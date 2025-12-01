@@ -1,0 +1,42 @@
+{
+  "name": "chatapplication",
+  "version": "1.0.0",
+  "description": "Scalable chat app using TypeScript, PostgreSQL, Kysely, Redis, and Socket.IO",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js"
+  },
+  "keywords": [
+    "chat",
+    "typescript",
+    "socket.io",
+    "kysely",
+    "redis",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "kysely": "^0.28.8",
+    "pg": "^8.16.3",
+    "redis": "^5.10.0",
+    "socket.io": "^4.8.1",
+    "websocket": "^1.0.35",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
