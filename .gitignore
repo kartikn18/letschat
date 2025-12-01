@@ -1,0 +1,47 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# redis dumps
+dump.rdb
+*.rdb
+*.aof
+
+# coverage
+coverage/
+
+# temporary
+tmp/
+temp/
+*.tmp
+*.temp
+
+# typescript
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# database
+*.sqlite
+*.db
+
+# exports
+out/
+public/uploads/
