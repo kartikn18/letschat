@@ -32,10 +32,10 @@ export function initSocket(server: http.Server) {
     socket.on("message", async(payload:{room_id:number,user_id:number,content:string})=>{
         const msg = await savedMessage(payload.room_id,payload.user_id,payload.content);
         //room concept
-        io.to(String(payload.room_id)).emit("newMessage",msg);
+        io.to(String(payload.room_id)).emit("newMessage",msg);//emitting messages to room_id 
     })
     socket.on("disconnecting", () => {
-      console.log('Client is disconnecting');
+      console.log('Client is disconnecting');//debugging purpose 
     });
   });
 }
