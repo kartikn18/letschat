@@ -1,6 +1,8 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { initSocket } from './socket.js';
 import webRoutes from './routes/web.routes.js';
 import {redis} from './config/redis.js';
@@ -8,6 +10,10 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// ES Module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 //create HTTP server

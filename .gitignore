@@ -1,47 +1,58 @@
+# Dependencies
 node_modules/
-dist/
-build/
-.env
-.env.local
-.env.*.local
-
-# logs
-logs/
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+package-lock.json
+yarn.lock
 
-# redis dumps
-dump.rdb
-*.rdb
-*.aof
+# Build output
+dist/
+build/
+*.js.map
 
-# coverage
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# Testing
 coverage/
+.nyc_output/
 
-# temporary
+# OS files
+Thumbs.db
+.DS_Store
+
+# Redis dump
+dump.rdb
+
+# Temporary files
 tmp/
 temp/
 *.tmp
-*.temp
 
-# typescript
-*.tsbuildinfo
+# Debug
+.pnp.*
+.yarn/
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-
-# database
-*.sqlite
-*.db
-
-# exports
-out/
-public/uploads/
+# Optional npm cache directory
+.npm

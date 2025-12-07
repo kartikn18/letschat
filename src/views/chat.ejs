@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Chat: <%= room.name %></title>
-    <script src="/public/client.js"></script>
-  </head>
-  <body>
-    <h1>Room: <%= room.name %></h1>
-    <div id="messages" style="height:300px;overflow:auto;border:1px solid #ccc;padding:8px;"></div>
-    <form id="sendForm">
-      <input id="msg" autocomplete="off" /><button>Send</button>
-    </form>
+<head>
+  <meta charset="utf-8" />
+  <title>Chat: <%= room.name %></title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/public/client.js"></script>
+</head>
 
-    <script>
-      window.APP = {
-        user: <%= JSON.stringify(user) %>,
-        room: <%- JSON.stringify(room) %>,
-        socketUrl: '<%= socketUrl %>'
-      };
-    </script>
-  </body>
+<body>
+  <h1>Room: <%= room.name %></h1>
+
+  <div id="messages"
+       style="height:300px;overflow:auto;border:1px solid #ccc;padding:8px;">
+  </div>
+
+  <form id="sendForm">
+    <input id="msg" autocomplete="off" />
+    <button type="submit">Send</button>
+  </form>
+
+  <script id="app-data" type="application/json">
+    <%- JSON.stringify({ user: user, room: room, socketUrl: socketUrl }) %>
+  </script>
+</body>
 </html>

@@ -1,0 +1,53 @@
+(function() {
+  // Read server-provided data from the JSON script to avoid inline EJS in JS
+  try {
+    const raw = document.getElementById('app-data') && document.getElementById('app-data').textContent;
+    window.APP = raw ? JSON.parse(raw) : (window.APP || {});
+  } catch (err) {
+    window.APP = window.APP || {};
+    console.error('Failed to parse #app-data JSON', err);
+  }
+
+  const user = window.APP.user;
+  const room = window.APP.room;
+
+  const socket = io(window.APP.socketUrl, {
+    query: { username: user && user.username, room: room && room.id }
+  });
+
+  const messagesDiv = document.getElementById("messages");
+  const form = document.getElementById("sendForm");
+  const input = document.getElementById("msg");
+
+  function appendMessage(m) {
+    const el = document.createElement("div");
+    el.textContent = `[${new Date(m.created_at).toLocaleTimeString()}] ${m.username || user.username}: ${m.content}`;
+    messagesDiv.appendChild(el);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  socket.on("connect", () => {
+    socket.emit("joinRoom", room.id);
+  });
+
+  socket.on("recentMessages", (messages) => {
+    messages.forEach(appendMessage);
+  });
+
+  socket.on("message", (m) => {
+    appendMessage(m);
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!input.value) return;
+
+    socket.emit("message", {
+      room_id: room.id,
+      user_id: user.id,
+      content: input.value
+    });
+
+    input.value = "";
+  });
+})();
