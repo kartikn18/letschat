@@ -7,6 +7,10 @@ router.get('/', (req, res) => {
   res.render('index', { user: null });
 });
 
+router.get('/join', (req, res) => {
+  res.redirect('/');
+});
+
 router.post('/join', rateLimit, async (req, res) => {
   
   const { username, room } = req.body;

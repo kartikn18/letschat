@@ -8,3 +8,13 @@ export const redis = createClient({
     port: Number(process.env.REDIS_PORT),
   },
 });
+redis.on("connect",()=>{
+  console.log("Redis client connected");
+})
+redis.on("error",(err)=>{
+  console.log("Redis Client Error",err);
+})
+
+redis.connect().catch((err)=>{
+  console.error("Could not connect to Redis",err);
+});

@@ -2,13 +2,19 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Chat: <%= room.name %></title>
+  <title>Chat: <%= room.room_name %></title>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/public/client.js"></script>
 </head>
 
 <body>
-  <h1>Room: <%= room.name %></h1>
+  <h1>Room: <%= room.room_name %></h1>
+
+  <!-- DEBUG INFO -->
+  <div style="background:#f0f0f0;padding:10px;margin:10px 0;">
+    <strong>Debug Info:</strong><br>
+    User: <%= JSON.stringify(user) %><br>
+    Room: <%= JSON.stringify(room) %><br>
+  </div>
 
   <div id="messages"
        style="height:300px;overflow:auto;border:1px solid #ccc;padding:8px;">
@@ -19,8 +25,21 @@
     <button type="submit">Send</button>
   </form>
 
+  <!-- PASS ONLY VALID DATA TO client.js -->
   <script id="app-data" type="application/json">
-    <%- JSON.stringify({ user: user, room: room, socketUrl: socketUrl }) %>
+    <%- JSON.stringify({
+      user: {
+        id: user.id,
+        username: user.username
+      },
+      room: {
+        id: room.id,
+        name: room.room_name
+      },
+      socketUrl: socketUrl
+    }) %>
   </script>
+
+  <script src="/client.js"></script>
 </body>
 </html>

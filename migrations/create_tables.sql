@@ -1,23 +1,27 @@
-CREATE TABLE IF NOT EXISTS users {
-    id serial PRIMARY KEY,
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-}
+    password VARCHAR(255) NOT NULL DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS rooms {
-    id serial PRIMARY KEY,
+-- Create rooms table
+CREATE TABLE IF NOT EXISTS rooms (
+    id SERIAL PRIMARY KEY,
     room_name VARCHAR(100) UNIQUE NOT NULL,
-    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-}
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS messages {
-    id serial PRIMARY KEY,
+-- Create messages table
+CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     room_id INT REFERENCES rooms(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-}
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Create index
 CREATE INDEX IF NOT EXISTS idx_messages_room_created_at 
 ON messages(room_id, created_at DESC);
-ALTER TABLE users ADD COLUMN password varchar(255) NOT NULL DEFAULT '';

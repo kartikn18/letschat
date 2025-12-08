@@ -1,26 +1,26 @@
-export type User ={
-    id:number,
-    username : string,
-    craetedAt: Date
-    password:string
+export type User = {
+    id: number,
+    username: string,
+    password: string,
+    created_at: Date
 }
 
-export type Message ={
-    id : number,
-    room_id:number,
-    user_id:number,
-    message:string,
-    createdAt:Date
+export type Message = {
+    id: number,
+    room_id: number,
+    user_id: number,
+    content: string,
+    created_at: Date
 }
 
-export type Room={
-    id : number,
-    name:string,
-    createdAt: Date
+export type Room = {
+    id: number,
+    room_name: string,
+    created_at: Date
 }
 
 export interface Database {
-    users:User,
-    rooms:Room,
-    messages:Message
+    users: User,
+    rooms: Room,
+    messages: Message
 }
