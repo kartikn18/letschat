@@ -29,7 +29,7 @@ app.use('/',webRoutes);
 //initialize socket
 const io = initSocket(server);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 server.listen(PORT,async()=>{
     try {
         await redis.ping();

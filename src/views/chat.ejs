@@ -2,18 +2,28 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Chat: <%= room.room_name %></title>
+  <title>Chat: <%= room.room_name || 'Chat Room' %></title>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-  <h1>Room: <%= room.room_name %></h1>
+  <h1>Room: <%= room.room_name || 'Chat Room' %></h1>
+
+  <!-- Connection Status -->
+  <div id="status" style="padding:5px;background:yellow;margin:10px 0;">
+    Connecting...
+  </div>
 
   <!-- DEBUG INFO -->
   <div style="background:#f0f0f0;padding:10px;margin:10px 0;">
-    <strong>Debug Info:</strong><br>
-    User: <%= JSON.stringify(user) %><br>
-    Room: <%= JSON.stringify(room) %><br>
+    <strong>Debug Info (Raw from server):</strong><br>
+    User Object: <%= JSON.stringify(user) %><br>
+    Room Object: <%= JSON.stringify(room) %><br>
+    Socket URL: <%= socketUrl %><br>
+    <hr>
+    <strong>Extracted Values:</strong><br>
+    User ID: <%= user?.id || 'UNDEFINED' %><br>
+    Room ID: <%= room?.id || 'UNDEFINED' %><br>
   </div>
 
   <div id="messages"
@@ -21,20 +31,20 @@
   </div>
 
   <form id="sendForm">
-    <input id="msg" autocomplete="off" />
+    <input id="msg" autocomplete="off" placeholder="Type a message..." />
     <button type="submit">Send</button>
   </form>
 
-  <!-- PASS ONLY VALID DATA TO client.js -->
+  <!-- Pass data to client.js -->
   <script id="app-data" type="application/json">
     <%- JSON.stringify({
       user: {
-        id: user.id,
-        username: user.username
+        id: user?.id || null,
+        username: user?.username || 'Unknown'
       },
       room: {
-        id: room.id,
-        name: room.room_name
+        id: room?.id || null,
+        name: room?.room_name || 'Unknown'
       },
       socketUrl: socketUrl
     }) %>
