@@ -3,17 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <title>Join Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: 0 auto; }
+    .error { background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+    input { width: 100%; padding: 8px; margin: 5px 0 15px 0; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #45a049; }
+    label { font-weight: bold; }
+  </style>
 </head>
 <body>
   <h1>Join Chat</h1>
+  
+  <% if (error) { %>
+    <div class="error">
+      ⚠️ <%= error %>
+    </div>
+  <% } %>
+  
   <form action="/join" method="post">
     <label>Username</label>
-    <input name="username" required /><br/>
+    <input name="username" required placeholder="Enter your username" />
 
     <label>Room Name</label>
-    <input name="room" required /><br/>
+    <input name="room" required placeholder="Enter room name" />
 
-    <button type="submit">Join</button>
+    <label>Room Password</label>
+    <input type="password" name="password" required placeholder="Enter room password" />
+
+    <button type="submit">Join Chat</button>
   </form>
+  
+  <p style="color: #666; font-size: 14px; margin-top: 20px;">
+    💡 <strong>Tip:</strong> If the room doesn't exist, it will be created with your password. 
+    Others will need this password to join.
+  </p>
 </body>
 </html>

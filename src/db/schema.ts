@@ -17,6 +17,7 @@ export type Room = {
     id: number,
     room_name: string,
     created_at: Date
+    password:string
 }
 
 export interface Database {

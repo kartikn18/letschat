@@ -1,6 +1,6 @@
 import { db } from "../config/db.js";
 import { z } from "zod";
-
+import bcrypt from "bcrypt";
 export const createUserSchema = z.object({ username: z.string().min(1) });
 export const createRoomSchema = z.object({ name: z.string().min(1) });
 export const messageSchema = z.object({
@@ -148,3 +148,35 @@ export async function getRecentMessages(room_id: number, limit: number = 50) {
     return [];
   }
 }
+export async function createRoomWithPassword(name:string,password:string){
+const hashedpassword = await bcrypt.hash(password,10);
+const newRoom = await db
+      .insertInto("rooms")
+      .values({
+        room_name:name,
+        password:hashedpassword}as any)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+      return newRoom;
+}
+export async function compareRoomPassword(roomname:string,password:string): Promise<boolean> {
+  const room = await db
+  .selectFrom("rooms")
+  .select(["password"])
+  .where("room_name","=",roomname)
+  .executeTakeFirst();
+if(!room){
+  return false;
+} 
+return await bcrypt.compare(password,room.password)
+}
+
+ export async function findRoomByName(name:string){
+  const newRoom = await db
+      .selectFrom("rooms")
+      .selectAll()
+      .where("room_name","=",name)
+      .executeTakeFirst();
+      return newRoom;
+}
+

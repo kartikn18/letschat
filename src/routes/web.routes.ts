@@ -1,11 +1,17 @@
 import express from "express";
 import { rateLimit } from "../middlewares/rateLimit.js";
-import { findOrCreateRoom, findOrCreateUser } from "../service/chats.service.js";
+import { 
+  findOrCreateUser, 
+  findRoomByName, 
+  createRoomWithPassword,
+  compareRoomPassword  // ← Import these new functions
+} from "../service/chats.service.js";
+import bcrypt from "bcrypt";
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.render('index', { user: null });
+  res.render('index', { user: null, error: null });  // ← Add error: null
 });
 
 router.get('/join', (req, res) => {
@@ -15,41 +21,63 @@ router.get('/join', (req, res) => {
 router.post('/join', rateLimit, async (req, res) => {
   console.log('POST /join - Body:', req.body);
   
-  const { username, room } = req.body;
-  if (!username || !room) {
-    console.log('Missing username or room');
-    return res.redirect('/');
+  const { username, room, password } = req.body;
+  
+  // Validate all fields
+  if (!username || !room || !password) {
+    return res.render('index', { 
+      user: null, 
+      error: 'All fields are required' 
+    });
   }
   
   try {
+    // Find or create user
     const user = await findOrCreateUser(username);
-    const roomObj = await findOrCreateRoom(room);
     
-    console.log('=== DATABASE RESULTS ===');
-    console.log('User:', JSON.stringify(user, null, 2));
-    console.log('User keys:', user ? Object.keys(user) : 'null');
-    console.log('Room:', JSON.stringify(roomObj, null, 2));
-    console.log('Room keys:', roomObj ? Object.keys(roomObj) : 'null');
-    console.log('========================');
+    // Check if room exists
+    const existingRoom = await findRoomByName(room);
     
-    if (!user) {
-      console.error('❌ User is null!');
-      return res.redirect('/');
+    let roomObj;
+    
+    if (existingRoom) {
+      // Room exists - verify password
+      console.log('🔑 Room exists, checking password...');
+      const passwordMatch = await compareRoomPassword(room, password);
+      
+      if (!passwordMatch) {
+        // Wrong password!
+        console.log('❌ Incorrect password');
+        return res.render('index', { 
+          user: null, 
+          error: 'Incorrect password for this room' 
+        });
+      }
+      
+      // Password correct
+      console.log('✅ Password correct');
+      roomObj = existingRoom;
+      
+    } else {
+      // Room doesn't exist - create it with this password
+      console.log('➕ Creating new room with password');
+      roomObj = await createRoomWithPassword(room, password);
     }
     
-    if (!roomObj) {
-      console.error('❌ Room is null!');
-      return res.redirect('/');
-    }
+    console.log('✅ User joining room:', { user, room: roomObj });
     
     res.render('chat', {
       user,
       room: roomObj,
       socketUrl: `${req.protocol}://${req.get('host')}`
     });
+    
   } catch (error) {
-    console.error('Error in /join:', error);
-    res.redirect('/');
+    console.error('❌ Error in /join:', error);
+    res.render('index', { 
+      user: null, 
+      error: 'An error occurred. Please try again.' 
+    });
   }
 });
 
