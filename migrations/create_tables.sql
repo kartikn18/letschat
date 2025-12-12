@@ -26,3 +26,5 @@ CREATE TABLE IF NOT EXISTS messages (
 -- Create index
 CREATE INDEX IF NOT EXISTS idx_messages_room_created_at 
 ON messages(room_id, created_at DESC);
+ALTER TABLE messages ADD COLUMN message_type VARCHAR(20) DEFAULT 'text';
+-- Values: 'text', 'image', 'file', 'video', etc.

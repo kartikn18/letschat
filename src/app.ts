@@ -8,7 +8,7 @@ import webRoutes from './routes/web.routes.js';
 import {redis} from './config/redis.js';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
-
+import uploadRoutes from "./routes/upload.routes.js"
 dotenv.config();
 
 // ES Module equivalent of __dirname
@@ -24,8 +24,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+//routes
 app.use('/',webRoutes);
+app.use('/api',uploadRoutes);
 //initialize socket
 const io = initSocket(server);
 

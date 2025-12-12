@@ -1,41 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat: <%= room.room_name || 'Chat Room' %></title>
-  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #status {
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    #messages {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    #sendForm {
+      display: flex;
+      gap: 5px;
+    }
+    #msg {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #4CAF50;
+      color: white;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #uploadBtn {
+      background: #2196F3;
+      font-size: 18px;
+    }
+    #uploadBtn:hover {
+      background: #0b7dda;
+    }
+  </style>
 </head>
 
 <body>
   <h1>Room: <%= room.room_name || 'Chat Room' %></h1>
 
   <!-- Connection Status -->
-  <div id="status" style="padding:5px;background:yellow;margin:10px 0;">
+  <div id="status" style="background: yellow; color: black;">
     Connecting...
   </div>
 
-  <!-- DEBUG INFO -->
-  <div style="background:#f0f0f0;padding:10px;margin:10px 0;">
-    <strong>Debug Info (Raw from server):</strong><br>
-    User Object: <%= JSON.stringify(user) %><br>
-    Room Object: <%= JSON.stringify(room) %><br>
-    Socket URL: <%= socketUrl %><br>
-    <hr>
-    <strong>Extracted Values:</strong><br>
-    User ID: <%= user?.id || 'UNDEFINED' %><br>
-    Room ID: <%= room?.id || 'UNDEFINED' %><br>
-  </div>
+  <!-- Messages Area -->
+  <div id="messages"></div>
 
-  <div id="messages"
-       style="height:300px;overflow:auto;border:1px solid #ccc;padding:8px;">
-  </div>
-
+  <!-- Send Form -->
   <form id="sendForm">
-    <input id="msg" autocomplete="off" placeholder="Type a message..." />
+    <input 
+      id="msg" 
+      autocomplete="off" 
+      placeholder="Type a message..." 
+      maxlength="2000"
+    />
+    
+    <!-- Hidden File Input -->
+    <input 
+      type="file" 
+      id="fileInput" 
+      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
+      style="display:none;" 
+    />
+    
+    <!-- Upload Button -->
+    <button type="button" id="uploadBtn" title="Upload Image">📎</button>
+    
+    <!-- Send Button -->
     <button type="submit">Send</button>
   </form>
 
-  <!-- Pass data to client.js -->
+  <!-- Pass data to JavaScript -->
   <script id="app-data" type="application/json">
     <%- JSON.stringify({
       user: {
@@ -50,6 +109,7 @@
     }) %>
   </script>
 
+  <!-- Load client-side JavaScript -->
   <script src="/client.js"></script>
 </body>
 </html>

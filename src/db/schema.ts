@@ -11,6 +11,7 @@ export type Message = {
     user_id: number,
     content: string,
     created_at: Date
+    message_type: string
 }
 
 export type Room = {

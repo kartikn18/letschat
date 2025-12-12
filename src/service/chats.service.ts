@@ -84,7 +84,7 @@ export async function findOrCreateRoom(name: string) {
   }
 }
 
-export async function savedMessage(room_id: number, user_id: number, content: string) {
+export async function savedMessage(room_id: number, user_id: number, content: string,message_type:string='text') {
   console.log('💾 savedMessage called:', { room_id, user_id, content });
   
   try {
@@ -93,7 +93,8 @@ export async function savedMessage(room_id: number, user_id: number, content: st
       .values({
         room_id,
         user_id,
-        content
+        content,
+        message_type
       } as any)
       .returningAll()
       .executeTakeFirstOrThrow();
