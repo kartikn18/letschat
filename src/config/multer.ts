@@ -2,10 +2,16 @@ import multer from "multer"
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 //config disk storgae 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const uploadfile = path.join(__dirname,'../public/uploads');
 const storage = multer.diskStorage({
     destination:function(req,file,cb){
-        cb(null,'public/files.txt')
+        cb(null,uploadfile);
     },
     // filename function 
 filename: (req, file, cb) => {
@@ -17,7 +23,7 @@ filename: (req, file, cb) => {
 );
 //check extension 
 const fileFilter = (req:any,file:Express.Multer.File,cb:any)=>{
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt/;
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|pdf|/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const minetype = allowedTypes.test(file.mimetype);
     if(extname && minetype){
