@@ -50,3 +50,6 @@ coverage/
 .pnp.*
 .yarn/
 .npm
+# uploaded files
+public/uploads/
+ 
