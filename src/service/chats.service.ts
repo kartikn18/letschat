@@ -1,6 +1,7 @@
 import { db } from "../config/db.js";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { redis } from "../config/redis.js";
 export const createUserSchema = z.object({ username: z.string().min(1) });
 export const createRoomSchema = z.object({ name: z.string().min(1) });
 export const messageSchema = z.object({
@@ -180,4 +181,13 @@ return await bcrypt.compare(password,room.password)
       .executeTakeFirst();
       return newRoom;
 }
-
+//ONlineusers functions
+export async function addOnlineUser(userID:number,roomID:number){
+  await redis.sAdd(`online_users_room_${roomID}`,String(userID));
+}
+export async function removeOnlineUser(userID:number,roomID:number){
+  await redis.sRem(`online_users_room_${roomID}`,String(userID));
+}
+export async function countOnlineUsers(roomID:number):Promise<number>{
+   return await redis.sCard(`online_users_room_${roomID}`);
+}

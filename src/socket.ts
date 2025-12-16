@@ -3,7 +3,8 @@ import type { Socket as IOSocket } from "socket.io";
 import http from "http";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { redis } from "./config/redis.js";
-import { savedMessage, getRecentMessages } from "./service/chats.service.js";
+import { savedMessage, getRecentMessages, addOnlineUser, countOnlineUsers, removeOnlineUser } from "./service/chats.service.js";
+import { Socket } from "socket.io-client";
 
 export async function initSocket(server: http.Server) {
   const io = new IOServer(server, {
@@ -25,18 +26,29 @@ export async function initSocket(server: http.Server) {
     console.log('✓ Client connected:', socket.id);
 
     const { username, room } = socket.handshake.query as Record<string, string>;
+    const {user_id} = socket.handshake.query as any;
 
     if (room) {
       socket.join(room);
       console.log('Client joined room from handshake:', room);
     }
+    if (user_id){
+      socket.data.userId = Number(user_id);
+    }
+    socket.data.joinRoom = new Set<number>();
 
     // ================= JOIN ROOM =================
     socket.on("joinRoom", async (room_id: number) => {
       console.log('✓ joinRoom event, room_id:', room_id);
       socket.join(String(room_id));
-
+      socket.data.joinRoom.add(room_id);
+      const userId = socket.data.userId;
+      if(!userId) return ;
       try {
+        const isonline = await addOnlineUser(room_id,userId);
+        console.log(`User ${userId} added to online users in room ${room_id}:`, isonline);
+        const count = await countOnlineUsers(room_id);
+        io.to(String(room_id)).emit("onlineUsersCount", count);
         const recent = await getRecentMessages(room_id, 50);
         socket.emit("recentMessages", recent.reverse());
       } catch (error) {
@@ -94,14 +106,21 @@ export async function initSocket(server: http.Server) {
     });
 
     // ================= DISCONNECT =================
-    socket.on("disconnecting", () => {
+    socket.on("disconnecting", async() => {
       console.log('❌ Client disconnecting:', socket.id);
+      const userId = socket.data.userId;
+      if(!userId) return ;
+      for ( const roomID of socket.data.joinRoom){
+        await removeOnlineUser(roomID,userId);
+        const count = await countOnlineUsers(roomID);
+        io.to(String(roomID)).emit("onlineUsersCount", count);
+      }
     });
+
 
     socket.on("error", (error) => {
       console.error('❌ Socket error:', error);
     });
   });
-
   return io;
 }
