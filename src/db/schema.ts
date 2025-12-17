@@ -26,7 +26,7 @@ export type RoomMember= {
     room_id:number,
     user_id:number,
     joined_at:Date,
-    last_seen:Date,
+    last_seen_at:Date,
 }
 
 export type RoomSession = {
