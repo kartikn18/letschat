@@ -29,7 +29,7 @@ export type RoomMember= {
     last_seen:Date,
 }
 
-export type RoomSesion = {
+export type RoomSession = {
     id:number,
     room_id:number,
     user_id:number,
@@ -43,5 +43,5 @@ export interface Database {
     rooms: Room,
     messages: Message
     room_members:RoomMember,
-    room_session:RoomSesion
+    room_sessions:RoomSession
 }
