@@ -10,7 +10,7 @@ export type Message = {
     room_id: number,
     user_id: number,
     content: string,
-    created_at: Date
+    created_at: Date,
     message_type: string
 }
 
@@ -21,8 +21,27 @@ export type Room = {
     password:string
 }
 
+export type RoomMember= {
+    id:number,
+    room_id:number,
+    user_id:number,
+    joined_at:Date,
+    last_seen:Date,
+}
+
+export type RoomSesion = {
+    id:number,
+    room_id:number,
+    user_id:number,
+    socket_id:string,
+    joined_at :Date,
+    is_active:boolean,
+}
+
 export interface Database {
     users: User,
     rooms: Room,
     messages: Message
+    room_members:RoomMember,
+    room_session:RoomSesion
 }
