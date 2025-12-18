@@ -19,6 +19,8 @@ export type Room = {
     room_name: string,
     created_at: Date
     password:string
+    is_public:boolean,
+    description :string,
 }
 
 export type RoomMember= {

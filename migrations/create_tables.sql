@@ -52,3 +52,12 @@ CREATE TABLE IF NOT EXISTS room_sessions (
 CREATE INDEX idx_room_members_room ON room_members(room_id);
 CREATE INDEX idx_room_sessions_room_active ON room_sessions(room_id, is_active);
 CREATE INDEX idx_room_sessions_socket ON room_sessions(socket_id);
+
+ALTER TABLE rooms 
+ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '',
+-- Update existing rooms to be private (since they all have passwords)
+UPDATE rooms SET is_public = false WHERE password IS NOT NULL AND password != '';
+
+-- Update description for existing rooms
+UPDATE rooms SET description = 'Private chat room' WHERE description = '' OR description IS NULL;
