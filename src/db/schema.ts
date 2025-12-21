@@ -52,4 +52,5 @@ export interface Database {
     messages: Message
     room_members:RoomMember,
     room_sessions:RoomSession
+    profile_avatars:ProfileAvtar
 }
