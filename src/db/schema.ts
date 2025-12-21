@@ -39,6 +39,12 @@ export type RoomSession = {
     joined_at :Date,
     is_active:boolean,
 }
+export type ProfileAvtar ={
+    id:number,
+    user_id:number,
+    avtar_url:string,
+    created_at:Date
+}
 
 export interface Database {
     users: User,

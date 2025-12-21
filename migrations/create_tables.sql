@@ -61,3 +61,10 @@ UPDATE rooms SET is_public = false WHERE password IS NOT NULL AND password != ''
 
 -- Update description for existing rooms
 UPDATE rooms SET description = 'Private chat room' WHERE description = '' OR description IS NULL;
+-- Create profile_avatars table
+CREATE TABLE IF NOT EXISTS profile_avatars (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    avatar_url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
