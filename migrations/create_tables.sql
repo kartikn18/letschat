@@ -61,3 +61,14 @@ CREATE TABLE IF NOT EXISTS profile_avatars (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+--Auth System Improvements -Done!
+ALTER TABLE users ADD COLUMN email VARCHAR(100) UNIQUE NOT NULL,
+ADD COLUMN is_verified BOOLEAN DEFAULT false;
+--ADD otp table for email verification 
+CREATE TABLE email_otps (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  otp VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

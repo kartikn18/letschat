@@ -17,7 +17,7 @@ router.post(
         });
       }
 
-      const userId = req.user.id; // from auth middleware
+      const userId = req.User.id; // from auth middleware
       const avatarUrl = `/public/avatar/${req.file.filename}`;
 
       await setUserAvatarOrUpdate(userId, avatarUrl);

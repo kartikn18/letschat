@@ -1,30 +1,35 @@
-import bcrypt from "bcrypt"
-import {db }from "../config/db.js"
+import {db} from "../config/db.js";
+import bcrypt from "bcrypt";
 
-export async function hashedPassword(password:string):Promise<string>{
-    return await bcrypt.hash(password,10)
+export async function hashPassword(password:string): Promise<string> {
+ return await bcrypt.hash(password,10);
 }
-
-export async function comparePassword(password:string,hashedPassword:string):Promise<boolean>{
-    return await bcrypt.compare(password,hashedPassword)
+export async function checkUserExists(email:string){
+    const existingUser = await db.
+    selectFrom('users')
+    .select(['id','email'])
+    .where('email','=',email)
+    .executeTakeFirstOrThrow();
+    return existingUser;
 }
-
-export async function findUserByUsername(username:string){
-    return db
-    .selectFrom("users")
-    .selectAll()
-    .where("username", "=", username)
-    .executeTakeFirst()
-}
-export async function createUser(username:string,Password:string){
-    const hashed = await hashedPassword(Password)
-    const[user] = await db
-    .insertInto("users")
+export async function CreateUser(email:string,password:string){
+    const existingUser = await checkUserExists(email)
+    if (existingUser){
+      throw Error('User already exists');
+    }
+    const newUser = await db
+    .insertInto('users')
     .values({
-        username,
-        password: hashed
+        email:email,
+        password: await hashPassword(password),
+        created_at:new Date()
     } as any)
-    .returningAll()
-    .execute()
-    return user
-}
+    .returning(['id','email'])
+    .executeTakeFirst();
+    return newUser;
+};
+
+const otpGenerate = ()=>{
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
+ 

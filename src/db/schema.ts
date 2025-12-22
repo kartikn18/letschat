@@ -3,6 +3,8 @@ export type User = {
     username: string,
     password: string,
     created_at: Date
+    email:string,
+    is_verified:boolean
 }
 
 export type Message = {
