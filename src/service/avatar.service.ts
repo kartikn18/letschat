@@ -1,42 +1,44 @@
 import { db } from "../config/db.js";
 import path from "path";
 import fs from "fs";
-export async function setUserAvatarOrUpdate (user_id:number,avtar_url:string){
-    const avataUrl = '/public/avatar/${fileName}';
-    //check if avatar exist-
-    const exixtingAvatar = await db
-    .selectFrom('profile_avatars')
-    .select(['id','avtar_url'])
-    .where('user_id',"=",user_id)
+
+export async function setUserAvatarOrUpdate(
+  user_id: number,
+  avatar_url: string
+) {
+  // check existing avatar
+  const existingAvatar = await db
+    .selectFrom("profile_avatars")
+    .select(["id", 'avatar_url'])
+    .where("user_id", "=", user_id)
     .executeTakeFirst();
-    //delete existing avatar file from server
-    if(exixtingAvatar?.avtar_url){
-        const oldpath = path.join(process.cwd(),exixtingAvatar.avtar_url);
-        if(fs.existsSync(oldpath)){
-            fs.unlinkSync(oldpath);
-        }
+
+  // delete old file
+  if (existingAvatar?.avatar_url) {
+    const oldPath = path.join(process.cwd(), existingAvatar.avatar_url);
+    if (fs.existsSync(oldPath)) {
+      fs.unlinkSync(oldPath);
     }
-    if(exixtingAvatar){
-        //update avatar record 
-        const updateAvatar = await db
-        .updateTable('profile_avatars')
-        .set({
-            avtar_url:avataUrl,
-            created_at:new Date()
-        })
-        .where('user_id',"=",user_id)
-        .executeTakeFirst();
-    }
-    else{
-        //create new avatar record 
-         await db 
-        .insertInto('profile_avatars')
-        .values({
-            user_id:user_id,
-            avtar_url:avataUrl,
-            created_at:new Date(),
-        } as any)
-        .executeTakeFirst();
-    }
-return avataUrl;
+  }
+
+  if (existingAvatar) {
+    await db
+      .updateTable("profile_avatars")
+      .set({
+        avatar_url,
+        updated_at: new Date()
+      })
+      .where("user_id", "=", user_id)
+      .execute();
+  } else {
+    await db
+      .insertInto("profile_avatars")
+      .values({
+        user_id,
+        avatar_url
+      } as any)
+      .execute();
+  }
+
+  return avatar_url;
 }
