@@ -48,6 +48,13 @@ export type ProfileAvtar ={
     created_at:Date
     updated_at:Date
 }
+export type emailOtp = {
+    id:number,
+    email:string,
+    otp:string,
+    expires_at:Date,
+    created_at:Date
+}
 
 export interface Database {
     users: User,
@@ -55,5 +62,6 @@ export interface Database {
     messages: Message
     room_members:RoomMember,
     room_sessions:RoomSession
-    profile_avatars:ProfileAvtar
+    profile_avatars:ProfileAvtar,
+    email_otps:emailOtp
 }
