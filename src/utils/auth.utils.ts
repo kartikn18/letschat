@@ -12,7 +12,7 @@ export async function checkUserExists(email:string){
     selectFrom('users')
     .select(['id','email','password'])
     .where('email','=',email)
-    .executeTakeFirstOrThrow();
+    .executeTakeFirst();
     return existingUser;
 }
 export async function CreateUser(email:string,password:string){
@@ -29,7 +29,7 @@ export async function CreateUser(email:string,password:string){
     } as any)
     .returning(['id','email'])
     .executeTakeFirst();
-    return generatejwt(newUser?.email as any);
+    return newUser;
 }
 const otpGenerate = ()=>{
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -37,17 +37,25 @@ const otpGenerate = ()=>{
  // otp system 
  export async function generateandSaveOTP(email:string){
     const otp = otpGenerate();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await db
-    .insertInto('email_otps')
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+
+  // Remove old OTPs
+  await db
+    .deleteFrom("email_otps")
+    .where("email", "=", email)
+    .execute();
+
+  //  Insert new OTP
+  await db
+    .insertInto("email_otps")
     .values({
-        otp:otp,
-        email:email,
-        expires_at:expiresAt,
-        created_at:new Date()
-    }as any)
-.executeTakeFirst();
-return otp;
+      email,
+      otp,
+      expires_at: expiresAt,
+      created_at: new Date()
+    } as any)
+    .execute();
+  return otp;
  }
  export async function verifyOTP(email:string,otp:string){
     const record = await db
@@ -83,10 +91,11 @@ export async function LoginUser(email:string,password:string){
     if(!match){
         throw new Error('Incorrect password');
     }
-    return generatejwt(user.email);
+    return generateJWT({ id: user.id, email: user.email });
 }
 
-export function generatejwt(email:string){
-    const token = jwt.sign({email:email}, process.env.JWT_SECRET!);
-    return token;
-}
+export function generateJWT(payload: { id: number; email: string }) {
+  return jwt.sign(payload, process.env.JWT_SECRET!, {
+    expiresIn: "15m",
+  });
+};
