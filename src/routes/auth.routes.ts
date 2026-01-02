@@ -14,7 +14,8 @@ router.post('/register', async (req,res)=>{
         }
         //create user 
         const token = await CreateUser(email,password);
-        return res.status(201).json({token});
+        res.cookie('cookie',token,{httpOnly:true,sameSite:'strict'});
+         return res.status(201).json({token});
         //send response
     } catch (error) {
         return res.status(500).json({message: 'Internal server error'});
@@ -28,6 +29,7 @@ router.post('/login',async(req,res)=>{
             return res.status(400).json({message:'Invalid credentials'});
         }
         const token = await LoginUser(email,password);
+        res.cookie('cookie',token,{httpOnly:true,sameSite:'strict'});
         return res.status(200).json({token});
     } catch (error) {
         return res.status(500).json({message: 'Internal server error'});

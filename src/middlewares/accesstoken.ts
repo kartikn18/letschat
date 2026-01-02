@@ -3,7 +3,7 @@ import dotnev from 'dotenv';
 dotnev.config();
 export function authenticateToken(req:any,res:any,next:any){
     try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.authentication?.token;
     if(!token)
 {
      return res.status(401).json({message:'Access Token Required'});
@@ -15,5 +15,4 @@ export function authenticateToken(req:any,res:any,next:any){
     catch(err){
         return res.status(403).json({message:'Invalid Access Token'});
     }
-
 };
