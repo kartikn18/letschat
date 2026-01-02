@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { checkUserExists, CreateUser , LoginUser,generateandSaveOTP,sendOTPEmail,verifyOTP,hashPassword} from '../utils/auth.utils.js';
 import { db } from '../config/db.js';
+import { otpRequestLimit } from '../middlewares/otprequest.rl.js';
+import { forgetpasswordLimit } from '../middlewares/forgetpass.rl.js';
+import { otpverificationLimit } from '../middlewares/otpverification.rl.js';
 const router = Router();
 
 //register route 
@@ -46,6 +49,7 @@ router.post('/forgetPassword',async(req,res)=>{
         //genearate and save otp 
         const otp = await generateandSaveOTP(email);
         //send otp via email service (mocked here)
+        await otpRequestLimit(email);
         sendOTPEmail(email,otp);
         return res.status(200).json({message:'OTP sent to email'});
 
@@ -56,11 +60,13 @@ router.post('/forgetPassword',async(req,res)=>{
 router.post('/verifyOTP',async(req,res)=>{
     const {email,otp,newPassword} = req.body;
     try {
+      await otpverificationLimit(email);
       const userotp =  await verifyOTP(email,otp);
       if(!userotp){
         return res.status(400).json({message:'Invalid OTP'});
       }
       //update password
+      await forgetpasswordLimit(email);
       const hashed =  await hashPassword(newPassword);
       //update in db
       await db
@@ -74,3 +80,8 @@ router.post('/verifyOTP',async(req,res)=>{
         return res.status(500).json({message:'Internal server error'});
     }
 });
+router.post('/logout',(req,res)=>{
+    res.clearCookie('cookie',{httpOnly:true,sameSite:'strict'});
+    return res.status(200).json({message:'Logged out successfully'});
+});
+export default router;
