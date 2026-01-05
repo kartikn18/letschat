@@ -17,7 +17,7 @@ router.post(
         });
       }
 
-      const userId = req.User.id; // from auth middleware
+      const userId = req.User.id; // check sql for this update the sql query and use the avatar to emial only 
       const avatarUrl = `/public/avatar/${req.file.filename}`;
 
       await setUserAvatarOrUpdate(userId, avatarUrl);
