@@ -3,14 +3,14 @@ import path from "path";
 import fs from "fs";
 
 export async function setUserAvatarOrUpdate(
-  user_id: number,
+  email: string,
   avatar_url: string
 ) {
   // check existing avatar
   const existingAvatar = await db
     .selectFrom("profile_avatars")
-    .select(["id", 'avatar_url'])
-    .where("user_id", "=", user_id)
+    .select(["email", 'avatar_url'])
+    .where("email", "=", email)
     .executeTakeFirst();
 
   // delete old file
@@ -28,13 +28,13 @@ export async function setUserAvatarOrUpdate(
         avatar_url,
         updated_at: new Date()
       })
-      .where("user_id", "=", user_id)
+      .where("email", "=", email)
       .execute();
   } else {
     await db
       .insertInto("profile_avatars")
       .values({
-        user_id,
+        email,
         avatar_url
       } as any)
       .execute();

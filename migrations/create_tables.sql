@@ -56,7 +56,7 @@ CREATE INDEX idx_room_sessions_socket ON room_sessions(socket_id);
 -- Create profile_avatars table
 CREATE TABLE IF NOT EXISTS profile_avatars (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
     avatar_url VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

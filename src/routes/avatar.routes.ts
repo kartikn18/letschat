@@ -1,6 +1,7 @@
 import { setUserAvatarOrUpdate } from '../service/avatar.service.js'
 import { avatarUpload } from '../middlewares/avatar.multer.js'
 import { Router } from "express";
+import { email } from 'zod';
 
 export const router = Router();
 
@@ -17,10 +18,10 @@ router.post(
         });
       }
 
-      const userId = req.User.id; // check sql for this update the sql query and use the avatar to emial only 
+      const email = req.body.email; // check sql for this update the sql query and use the avatar to emial only 
       const avatarUrl = `/public/avatar/${req.file.filename}`;
 
-      await setUserAvatarOrUpdate(userId, avatarUrl);
+      await setUserAvatarOrUpdate(email, avatarUrl);
 
       res.json({
         success: true,
