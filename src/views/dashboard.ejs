@@ -1,0 +1,27 @@
+<h2 class="form-title">Dashboard</h2>
+<p class="form-subtitle">Welcome to your account</p>
+
+<div style="text-align: center; padding: 20px 0;">
+    <p style="color: #666; margin-bottom: 20px;">
+        You are successfully logged in!
+    </p>
+    <button id="logoutBtn" class="btn">Logout</button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            alert('Logout failed. Please try again.');
+        }
+    });
+});
+</script>

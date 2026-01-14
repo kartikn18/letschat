@@ -1,0 +1,27 @@
+<h2 class="form-title">Forgot Password</h2>
+<p class="form-subtitle">Enter your email to receive an OTP</p>
+
+<form id="forgotPasswordForm">
+    <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com">
+    </div>
+
+    <button type="submit" class="btn">Send OTP</button>
+    <div class="loading">Sending OTP...</div>
+</form>
+
+<div class="link-group">
+    <a href="/login">Back to Login</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    handleFormSubmit('forgotPasswordForm', '/api/auth/forgetPassword', '/verify-otp');
+
+    document.getElementById('forgotPasswordForm').addEventListener('submit', () => {
+        const email = document.getElementById('email').value;
+        sessionStorage.setItem('resetEmail', email);
+    });
+});
+</script>

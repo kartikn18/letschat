@@ -1,87 +1,151 @@
 import { Router } from 'express';
-import { checkUserExists, CreateUser , LoginUser,generateandSaveOTP,sendOTPEmail,verifyOTP,hashPassword} from '../utils/auth.utils.js';
+import { checkUserExists, CreateUser, LoginUser, generateandSaveOTP, sendOTPEmail, verifyOTP, hashPassword } from '../utils/auth.utils.js';
 import { db } from '../config/db.js';
 import { otpRequestLimit } from '../middlewares/otprequest.rl.js';
 import { forgetpasswordLimit } from '../middlewares/forgetpass.rl.js';
 import { otpverificationLimit } from '../middlewares/otpverification.rl.js';
+
 const router = Router();
 
-//register route 
-router.post('/register', async (req,res)=>{
+// Register route
+router.post('/register', async (req, res) => {
     try {
-        const {email,password} = req.body;
-        //check if user exists 
+        const { email, password } = req.body;
+        
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+        
+        // Check if user exists
         const existingUser = await checkUserExists(email);
         if (existingUser) {
-            return res.status(400).json({message: 'user already registered'});
+            return res.status(400).json({ message: 'User already registered' });
         }
-        //create user 
-        const token = await CreateUser(email,password);
-        res.cookie('cookie',token,{httpOnly:true,sameSite:'strict'});
-         return res.status(201).json({token});
-        //send response
+        
+        // Create user
+        const token = await CreateUser(email, password);
+        
+        // Set cookie with secure flags
+        res.cookie('cookie', token, {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+        
+        return res.status(201).json({ token, message: 'Registration successful' });
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        console.error('Register error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/login',async(req,res)=>{
+
+// Login route
+router.post('/login', async (req, res) => {
     try {
-        const {email,password} = req.body;
+        const { email, password } = req.body;
+        
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+        
         const existingUser = await checkUserExists(email);
-        if (!existingUser){
-            return res.status(400).json({message:'Invalid credentials'});
+        if (!existingUser) {
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
-        const token = await LoginUser(email,password);
-        res.cookie('cookie',token,{httpOnly:true,sameSite:'strict'});
-        return res.status(200).json({token});
+        
+        const token = await LoginUser(email, password);
+        
+        if (!token) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        
+        res.cookie('cookie', token, {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        
+        return res.status(200).json({ token, message: 'Login successful' });
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        console.error('Login error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
+});
 
-});   
-router.post('/forgetPassword',async(req,res)=>{
-    const {email} = req.body;
+// Forget Password - Request OTP (with rate limiting middleware)
+router.post('/forgetPassword', otpRequestLimit, async (req:any, res:any) => {
+    const { email } = req.body;
+    
     try {
+        // Validation
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+        
         const user = await checkUserExists(email);
-        if(!user){
-            return res.status(400).json({message:'User not found'});
+        if (!user) {
+            // Don't reveal if user exists or not for security
+            return res.status(200).json({ message: 'If the email exists, an OTP has been sent' });
         }
-        //genearate and save otp 
+        
+        // Generate and save OTP
         const otp = await generateandSaveOTP(email);
-        //send otp via email service (mocked here)
-        await otpRequestLimit(email);
-        sendOTPEmail(email,otp);
-        return res.status(200).json({message:'OTP sent to email'});
-
+        
+        // Send OTP via email
+        await sendOTPEmail(email, otp);
+        
+        return res.status(200).json({ message: 'OTP sent to email' });
     } catch (error) {
-        return res.status(500).json({message:'Internal server error'});
+        console.error('Forget password error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/verifyOTP',async(req,res)=>{
-    const {email,otp,newPassword} = req.body;
+
+// Verify OTP and Update Password (with rate limiting middleware)
+router.post('/verifyOTP', otpverificationLimit, async (req:any, res:any) => {
+    const { email, otp, newPassword } = req.body;
+    
     try {
-      await otpverificationLimit(email);
-      const userotp =  await verifyOTP(email,otp);
-      if(!userotp){
-        return res.status(400).json({message:'Invalid OTP'});
-      }
-      //update password
-      await forgetpasswordLimit(email);
-      const hashed =  await hashPassword(newPassword);
-      //update in db
-      await db
-      .updateTable('users')
-      .set({password:hashed} as any)
-      .where('email','=',email)
-      .execute();
-      return res.status(200).json({message:'Password updated successfully'});
-
+        // Validation
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+        }
+        
+        // Verify OTP
+        const isValidOTP = await verifyOTP(email, otp);
+        if (!isValidOTP) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+        
+        // Hash new password
+        const hashed = await hashPassword(newPassword);
+        
+        // Update password in database
+        await db
+            .updateTable('users')
+            .set({ password: hashed } as any)
+            .where('email', '=', email)
+            .execute();
+        
+        return res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-        return res.status(500).json({message:'Internal server error'});
+        console.error('Verify OTP error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/logout',(req,res)=>{
-    res.clearCookie('cookie',{httpOnly:true,sameSite:'strict'});
-    return res.status(200).json({message:'Logged out successfully'});
+
+// Logout route
+router.post('/logout', (req, res) => {
+    res.clearCookie('cookie', {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production'
+    });
+    return res.status(200).json({ message: 'Logged out successfully' });
 });
+
 export default router;
