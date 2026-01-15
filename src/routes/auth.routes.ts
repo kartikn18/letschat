@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
         
-        return res.status(201).json({ token, message: 'Registration successful' });
+        return res.status(201).json({ token, message: 'Registration successful' ,redirect:'/join'});
     } catch (error) {
         console.error('Register error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
         
-        return res.status(200).json({ token, message: 'Login successful' });
+        return res.status(200).json({ token, message: 'Login successful' ,redirect:'/join' });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -98,7 +98,7 @@ router.post('/forgetPassword', otpRequestLimit, async (req:any, res:any) => {
         // Send OTP via email
         await sendOTPEmail(email, otp);
         
-        return res.status(200).json({ message: 'OTP sent to email' });
+        return res.status(200).json({ message: 'OTP sent to email', redirect:'/verify-otp' });
     } catch (error) {
         console.error('Forget password error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -131,7 +131,7 @@ router.post('/verifyOTP', otpverificationLimit, async (req:any, res:any) => {
             .where('email', '=', email)
             .execute();
         
-        return res.status(200).json({ message: 'Password updated successfully' });
+        return res.status(200).json({ message: 'Password updated successfully', redirect:'/login' });
     } catch (error) {
         console.error('Verify OTP error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -145,7 +145,7 @@ router.post('/logout', (req, res) => {
         sameSite: 'strict',
         secure: process.env.NODE_ENV === 'production'
     });
-    return res.status(200).json({ message: 'Logged out successfully' });
+    return res.status(200).json({ message: 'Logged out successfully', redirect:'/login' });
 });
 
 export default router;

@@ -9,6 +9,8 @@ import {redis} from './config/redis.js';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import uploadRoutes from "./routes/upload.routes.js"
+import authroutes from './routes/auth.routes.js';
+import { redirectIfAuthenticated } from './middlewares/authenticationtokens.js';
 dotenv.config();
 
 // ES Module equivalent of __dirname
@@ -25,9 +27,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+//auth routes 
+app.use('/api/auth', redirectIfAuthenticated, authroutes);
+app.get('/register',redirectIfAuthenticated ,(req,res)=>{
+    res.render('register');
+})
+app.get('/login',redirectIfAuthenticated ,(req,res)=>{
+    res.render('login');
+});
+app.get('/forget-password',redirectIfAuthenticated ,(req,res)=>{
+    res.render('forget-password');
+});
+app.get('/verify-otp',redirectIfAuthenticated ,(req,res)=>{
+    res.render('verify-otp');
+});
 //routes
-app.use('/',webRoutes);
-app.use('/api',uploadRoutes);
+app.use('/', redirectIfAuthenticated, webRoutes);
+app.use('/api', redirectIfAuthenticated, uploadRoutes);
 //initialize socket
 const io = initSocket(server);
 
