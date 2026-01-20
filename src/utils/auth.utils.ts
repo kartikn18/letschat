@@ -35,7 +35,7 @@ export async function checkUserExists(email: string) {
  * Creates a new user and returns a JWT token
  * @throws Error if user already exists or database operation fails
  */
-export async function CreateUser(email: string, password: string): Promise<string> {
+export async function CreateUser(email: string, password: string,username:string): Promise<string> {
     // Validate inputs
     if (!email || !password) {
         throw new Error('Email and password are required');
@@ -58,6 +58,7 @@ export async function CreateUser(email: string, password: string): Promise<strin
         .values({
             email: email,
             password: hashedPassword,
+            username:username,
             created_at: new Date()
         } as any)
         .returning(['id', 'email'])
@@ -192,14 +193,25 @@ const resend = new Resend(process.env.RESEND_API_KEY!);
  * Sends OTP email using Resend
  * @throws Error if email sending fails
  */
+// Update sendOTPEmail in auth.utils.ts
 export async function sendOTPEmail(email: string, otp: string): Promise<void> {
     if (!email || !otp) {
         throw new Error('Email and OTP are required');
     }
     
+    console.log('=== EMAIL SENDING DEBUG ===');
+    console.log('Attempting to send to:', email);
+    console.log('OTP:', otp);
+    console.log('API Key exists:', !!process.env.RESEND_API_KEY);
+    console.log('Email from:', process.env.EMAIL_FROM);
+    
+    if (!process.env.RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY is not configured');
+    }
+    
     try {
         const { data, error } = await resend.emails.send({
-            from: process.env.EMAIL_FROM || "noreply@yourapp.com",
+            from: process.env.EMAIL_FROM || "onboarding@resend.dev",
             to: email,
             subject: "Your Password Reset OTP",
             html: `
@@ -218,14 +230,16 @@ export async function sendOTPEmail(email: string, otp: string): Promise<void> {
         });
         
         if (error) {
-            console.error('Email sending error:', error);
-            throw new Error('Failed to send OTP email');
+            console.error('Resend API error:', error);
+            throw new Error(`Failed to send OTP email: ${error.message}`);
         }
         
-        console.log('OTP email sent successfully:', data);
+        console.log('OTP email sent successfully!');
+        console.log('Email ID:', data?.id);
+        console.log('========================');
     } catch (error) {
         console.error('Error in sendOTPEmail:', error);
-        throw new Error('Failed to send OTP email');
+        throw error;
     }
 }
 

@@ -2,24 +2,48 @@
 <p class="form-subtitle">Welcome to your account</p>
 
 <div style="text-align: center; padding: 20px 0;">
+    <!-- User Information Display -->
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <p style="color: #333; font-size: 18px; margin-bottom: 10px;">
+            <strong>Username:</strong> <span><%= username %></span>
+        </p>
+        <p style="color: #333; font-size: 16px; margin-bottom: 0;">
+            <strong>Email:</strong> <span><%= email %></span>
+        </p>
+    </div>
+
     <p style="color: #666; margin-bottom: 20px;">
         You are successfully logged in!
     </p>
-    <button id="logoutBtn" class="btn">Logout</button>
+    
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="joinRoomBtn" class="btn" style="background: #4CAF50;">Join Room</button>
+        <button id="logoutBtn" class="btn" style="background: #f44336;">Logout</button>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Join Room button
+    document.getElementById('joinRoomBtn').addEventListener('click', () => {
+        window.location.href = '/join';
+    });
+
+    // Logout button
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         try {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
+                credentials: 'include'
             });
 
             if (response.ok) {
                 window.location.href = '/login';
+            } else {
+                alert('Logout failed. Please try again.');
             }
         } catch (error) {
+            console.error('Logout error:', error);
             alert('Logout failed. Please try again.');
         }
     });

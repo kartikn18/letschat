@@ -11,15 +11,18 @@ import dotenv from 'dotenv';
 import uploadRoutes from "./routes/upload.routes.js"
 import authroutes from './routes/auth.routes.js';
 import { redirectIfAuthenticated } from './middlewares/authenticationtokens.js';
+import cookieParser from 'cookie-parser';
+import { authenticate } from './middlewares/authenticationtokens.js';
 dotenv.config();
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
+//import socket from './socket.js';
 const app = express();
 //create HTTP server
 const server = http.createServer(app);
+app.use(cookieParser());'use strict';
 //middleware 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -28,22 +31,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 //auth routes 
-app.use('/api/auth', redirectIfAuthenticated, authroutes);
-app.get('/register',redirectIfAuthenticated ,(req,res)=>{
-    res.render('register');
-})
-app.get('/login',redirectIfAuthenticated ,(req,res)=>{
-    res.render('login');
+app.use('/api/auth', authroutes);
+app.get('/register', redirectIfAuthenticated, (req, res) => {
+    res.render('register', { title: 'Register - SecureChat' }); 
 });
-app.get('/forget-password',redirectIfAuthenticated ,(req,res)=>{
-    res.render('forget-password');
+app.get('/login',redirectIfAuthenticated ,(req,res)=>{
+    res.render('login', { title: 'Login - SecureChat' });
+});
+app.get('/forgot-password',redirectIfAuthenticated ,(req,res)=>{
+    res.render('forgot-password', { title: 'Forgot Password - SecureChat' });
 });
 app.get('/verify-otp',redirectIfAuthenticated ,(req,res)=>{
-    res.render('verify-otp');
+    res.render('verify-otp', { title: 'Verify OTP - SecureChat' });
+});
+app.get('/dashboard', authenticate, (req:any, res:any) => {
+    res.render('dashboard', { 
+        title: 'Dashboard - SecureChat',
+        username: req.user.username,
+        email: req.user.email
+    });
 });
 //routes
-app.use('/', redirectIfAuthenticated, webRoutes);
-app.use('/api', redirectIfAuthenticated, uploadRoutes);
+app.use('/', authenticate, webRoutes);
+app.use('/api', authenticate, uploadRoutes);
+
 //initialize socket
 const io = initSocket(server);
 
