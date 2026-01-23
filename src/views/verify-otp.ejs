@@ -1,65 +1,224 @@
-<h2 class="form-title">Verify OTP</h2>
-<p class="form-subtitle">Enter the code sent to your email</p>
-
-<form id="verifyOTPForm">
-    <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" required readonly>
-    </div>
-
-    <div class="form-group">
-        <label for="otp">OTP Code</label>
-        <input type="text" id="otp" name="otp" required placeholder="123456" maxlength="6" pattern="[0-9]{6}">
-    </div>
-
-    <div class="form-group">
-        <label for="newPassword">New Password</label>
-        <input type="password" id="newPassword" name="newPassword" required placeholder="••••••••" minlength="6">
-    </div>
-
-    <div class="form-group">
-        <label for="confirmPassword">Confirm New Password</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••" minlength="6">
-    </div>
-
-    <button type="submit" class="btn">Reset Password</button>
-    <div class="loading">Verifying...</div>
-</form>
-
-<div class="link-group">
-    <a href="/forgot-password">Resend OTP</a>
-    <div class="divider">or</div>
-    <a href="/login">Back to Login</a>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const email = sessionStorage.getItem('resetEmail');
-
-    if (email) {
-        document.getElementById('email').value = email;
-    } else {
-        window.location.href = '/forgot-password';
-    }
-
-    const form = document.getElementById('verifyOTPForm');
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-
-    confirmPassword.addEventListener('input', () => {
-        if (newPassword.value !== confirmPassword.value) {
-            confirmPassword.setCustomValidity('Passwords do not match');
-        } else {
-            confirmPassword.setCustomValidity('');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-    });
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #667eea; font-size: 28px; font-weight: 700; }
+        .form-title { text-align: center; color: #333; font-size: 24px; margin-bottom: 10px; }
+        .form-subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #333; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-group input:read-only {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .link-group { text-align: center; margin-top: 20px; }
+        .link-group a { color: #667eea; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .divider { margin: 15px 0; text-align: center; color: #999; font-size: 14px; }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .alert-error { background-color: #fee; color: #c33; border: 1px solid #fcc; }
+        .alert-success { background-color: #efe; color: #3c3; border: 1px solid #cfc; }
+        .loading { display: none; text-align: center; margin-top: 10px; color: #667eea; font-size: 14px; }
+        .loading.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>💬 SecureChat</h1>
+        </div>
+        
+        <h2 class="form-title">Verify OTP</h2>
+        <p class="form-subtitle">Enter the code sent to your email</p>
 
-    handleFormSubmit('verifyOTPForm', '/api/auth/verifyOTP', '/login');
+        <form id="verifyOTPForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required readonly>
+            </div>
 
-    form.addEventListener('submit', () => {
-        setTimeout(() => {
-            sessionStorage.removeItem('resetEmail');
-        }, 2000);
-    });
-});
-</script>
+            <div class="form-group">
+                <label for="otp">OTP Code</label>
+                <input type="text" id="otp" name="otp" required placeholder="123456" maxlength="6" pattern="[0-9]{6}" autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" name="newPassword" required placeholder="••••••••" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••" minlength="6">
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Reset Password</button>
+            <div class="loading" id="loading">⏳ Verifying...</div>
+        </form>
+
+        <div class="link-group">
+            <a href="/forgot-password">← Resend OTP</a>
+            <div class="divider">or</div>
+            <a href="/login">← Back to Login</a>
+        </div>
+    </div>
+    
+    <script>
+        console.log('✅ Script loaded');
+        
+        // Pre-fill email from sessionStorage
+        const email = sessionStorage.getItem('resetEmail');
+        console.log('📧 Retrieved email:', email);
+        
+        if (email) {
+            document.getElementById('email').value = email;
+        } else {
+            console.log('⚠️ No email found, redirecting to forgot-password');
+            window.location.href = '/forgot-password';
+        }
+
+        const form = document.getElementById('verifyOTPForm');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        // Password confirmation validation
+        confirmPassword.addEventListener('input', function() {
+            if (newPassword.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Passwords do not match');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('🚀 Form submitted');
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            
+            // Get form data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            console.log('📦 Form data:', {
+                email: data.email,
+                otp: data.otp,
+                hasPassword: !!data.newPassword
+            });
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+            
+            // Remove old alerts
+            const oldAlert = form.querySelector('.alert');
+            if (oldAlert) oldAlert.remove();
+            
+            try {
+                console.log('📤 Sending request to /api/auth/verifyOTP...');
+                
+                const response = await fetch('/api/auth/verifyOTP', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                
+                console.log('📥 Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('📦 Result:', result);
+                
+                if (response.ok) {
+                    console.log('✅ Success!');
+                    
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success';
+                    alert.textContent = result.message || 'Password reset successful!';
+                    form.insertBefore(alert, form.firstChild);
+                    
+                    // Clear sessionStorage
+                    console.log('🗑️ Clearing sessionStorage');
+                    sessionStorage.removeItem('resetEmail');
+                    
+                    console.log('🔄 Redirecting to login...');
+                    setTimeout(function() {
+                        window.location.href = result.redirect || '/login';
+                    }, 1500);
+                } else {
+                    console.error('❌ Error:', result.message);
+                    
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-error';
+                    alert.textContent = result.message || 'Failed to reset password';
+                    form.insertBefore(alert, form.firstChild);
+                    
+                    submitBtn.disabled = false;
+                    loading.classList.remove('show');
+                }
+            } catch (error) {
+                console.error('💥 Network error:', error);
+                
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-error';
+                alert.textContent = 'Network error: ' + error.message;
+                form.insertBefore(alert, form.firstChild);
+                
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+        
+        console.log('✅ Event listener attached');
+    </script>
+</body>
+</html>

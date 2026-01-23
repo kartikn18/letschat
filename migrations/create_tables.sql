@@ -2,8 +2,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL DEFAULT '',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    password VARCHAR(255) NOT NULL
 );
 
 -- Create rooms table
@@ -56,18 +56,23 @@ CREATE INDEX idx_room_sessions_socket ON room_sessions(socket_id);
 -- Create profile_avatars table
 CREATE TABLE IF NOT EXISTS profile_avatars (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
+   email VARCHAR(100) REFERENCES auth_credentials(email) ON DELETE CASCADE,
     avatar_url VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 --Auth System Improvements -Done!
-ALTER TABLE users ADD COLUMN email VARCHAR(100) UNIQUE NOT NULL,
-ADD COLUMN is_verified BOOLEAN DEFAULT false;
+CREATE TABLE auth_credentials (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 --ADD otp table for email verification 
 CREATE TABLE email_otps (
   id SERIAL PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL REFERENCES auth_credentials(email) ON DELETE CASCADE,
   otp VARCHAR(6) NOT NULL,
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

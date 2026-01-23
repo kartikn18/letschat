@@ -24,7 +24,7 @@ export async function comparePassword(password: string, hash: string): Promise<b
 
 export async function checkUserExists(email: string) {
     const existingUser = await db
-        .selectFrom('users')
+        .selectFrom('auth_credentials')
         .select(['id', 'email', 'password'])
         .where('email', '=', email)
         .executeTakeFirst();
@@ -35,7 +35,7 @@ export async function checkUserExists(email: string) {
  * Creates a new user and returns a JWT token
  * @throws Error if user already exists or database operation fails
  */
-export async function CreateUser(email: string, password: string,username:string): Promise<string> {
+export async function CreateUser(email: string, password: string): Promise<string> {
     // Validate inputs
     if (!email || !password) {
         throw new Error('Email and password are required');
@@ -54,11 +54,10 @@ export async function CreateUser(email: string, password: string,username:string
     // Create new user
     const hashedPassword = await hashPassword(password);
     const newUser = await db
-        .insertInto('users')
+        .insertInto('auth_credentials')
         .values({
             email: email,
             password: hashedPassword,
-            username:username,
             created_at: new Date()
         } as any)
         .returning(['id', 'email'])

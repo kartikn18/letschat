@@ -13,13 +13,22 @@ import authroutes from './routes/auth.routes.js';
 import { redirectIfAuthenticated } from './middlewares/authenticationtokens.js';
 import cookieParser from 'cookie-parser';
 import { authenticate } from './middlewares/authenticationtokens.js';
+import cors from 'cors';
 dotenv.config();
-
+const app = express();
+// cors middleware
+const corsOptions = {
+    origin: 'http://localhost:4000', 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 //import socket from './socket.js';
-const app = express();
+
 //create HTTP server
 const server = http.createServer(app);
 app.use(cookieParser());'use strict';
@@ -47,7 +56,6 @@ app.get('/verify-otp',redirectIfAuthenticated ,(req,res)=>{
 app.get('/dashboard', authenticate, (req:any, res:any) => {
     res.render('dashboard', { 
         title: 'Dashboard - SecureChat',
-        username: req.user.username,
         email: req.user.email
     });
 });

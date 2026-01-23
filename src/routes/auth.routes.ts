@@ -10,11 +10,11 @@ const router = Router();
 // Register route
 router.post('/register', async (req, res) => {
     try {
-        const { email, password,username } = req.body;
+        const { email, password} = req.body;
         
         // Validation
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email,username, password are required' });
+            return res.status(400).json({ message: 'Email, password are required' });
         }
         
         // Check if user exists
@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
         }
         
         // Create user
-        const token = await CreateUser(email, password,username);
+        const token = await CreateUser(email, password);
         
         // Set cookie with secure flags
         res.cookie('cookie', token, {
@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
 
 // Forget Password - Request OTP
 // Forget Password - Request OTP
-router.post('/forgetPassword', otpRequestLimit, async (req: any, res: any) => {
+router.post('/forgetPassword',otpRequestLimit, async (req: any, res: any) => {
     const { email } = req.body;
     
     console.log('=== FORGOT PASSWORD REQUEST ===');
@@ -161,7 +161,7 @@ router.post('/verifyOTP', otpverificationLimit, async (req: any, res: any) => {
         
         // Update password in database
         await db
-            .updateTable('users')
+            .updateTable('auth_credentials')
             .set({ password: hashed } as any)
             .where('email', '=', email)
             .execute();

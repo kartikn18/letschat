@@ -1,10 +1,8 @@
 export type User = {
     id: number,
     username: string,
-    password: string,
+    password:string,
     created_at: Date
-    email:string,
-    is_verified:boolean
 }
 
 export type Message = {
@@ -19,8 +17,8 @@ export type Message = {
 export type Room = {
     id: number,
     room_name: string,
-    created_at: Date
-    password:string
+    created_at: Date,
+    password:string,
     is_public:boolean,
     description :string,
 }
@@ -55,6 +53,13 @@ export type emailOtp = {
     expires_at:Date,
     created_at:Date
 }
+export type auth_credentials = {
+    id:number,
+    email :string,
+    password:string,
+    is_verified:boolean,
+    created_at :Date
+}
 
 export interface Database {
     users: User,
@@ -64,4 +69,5 @@ export interface Database {
     room_sessions:RoomSession
     profile_avatars:ProfileAvtar,
     email_otps:emailOtp
+    auth_credentials:auth_credentials
 }
