@@ -1,4 +1,4 @@
-import {upload} from "../config/multer.js";
+import {upload} from "../config/upload.js";
 import express from "express";
 import {db} from "../config/db.js";
 const router = express.Router();
@@ -10,7 +10,7 @@ router.post("/upload",upload.single('file'), async(req,res)=>{
     console.log('fileinfo',req.file);
     const {room_id,user_id} = req.body;
     // file url 
-    const fileurl = `/uploads/${req.file.filename}`;
+    const fileurl = req.file.path;
     //insert file into db
      const message = await db.insertInto('messages').values({
         room_id:Number(room_id),
@@ -23,9 +23,7 @@ router.post("/upload",upload.single('file'), async(req,res)=>{
       fileUrl: fileurl,
       message: message
     });
-
 }
-
 } catch (error) {
         console.error('❌ Error in /upload route:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
