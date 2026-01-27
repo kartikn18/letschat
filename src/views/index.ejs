@@ -1,16 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Join Chat</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: 0 auto; }
-    .error { background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
-    input { width: 100%; padding: 8px; margin: 5px 0 15px 0; box-sizing: border-box; }
-    button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #45a049; }
-    label { font-weight: bold; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Chat</title>
+<style>
+  /* Reset */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: radial-gradient(circle at top, #1a1a2e, #000);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    color: #fff;
+  }
+
+  h1 {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-size: 32px;
+    color: #b69cff;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  form {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    width: 100%;
+    max-width: 420px;
+    padding: 35px 30px 40px 30px;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 35px 80px rgba(138,108,255,0.4);
+  }
+
+  label {
+    font-weight: 500;
+    color: #ddd;
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  input::placeholder { color: #aaa; }
+
+  input:focus {
+    outline: none;
+    border-color: #b69cff;
+    box-shadow: 0 0 0 3px rgba(182,156,255,0.3);
+  }
+
+  input:invalid:not(:placeholder-shown) {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.3);
+  }
+
+  button {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #b69cff, #8a6cff);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(138,108,255,0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(138,108,255,0.8);
+    background: linear-gradient(135deg, #c2a1ff, #9d78ff);
+  }
+
+  .error {
+    background: rgba(255,60,60,0.15);
+    color: #ff7b7b;
+    border: 1px solid rgba(255,60,60,0.3);
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  p.tip {
+    color: #aaa;
+    font-size: 13px;
+    margin-top: 20px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  p.tip strong { color: #b69cff; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+
+  @media(max-width: 480px){
+    form { padding: 25px 20px 30px 20px; }
+    h1 { font-size: 26px; }
+  }
+
+</style>
 </head>
 <body>
   <h1>Join Chat</h1>
@@ -21,7 +141,7 @@
     </div>
   <% } %>
   
-  <form action="/join" method="post">
+  <form id="joinForm" action="/join" method="post">
     <label>Username</label>
     <input name="username" required placeholder="Enter your username" />
 
@@ -33,26 +153,21 @@
 
     <button type="submit">Join Chat</button>
   </form>
-  <script>
-    async function handleLogout() {
-      if (!confirm('Are you sure you want to logout?')) return;
-      
-      try {
-        const response = await fetch('/api/auth/logout', {
-          method: 'POST',
-        });
-        
-        if (response.ok) {
-          window.location.href = '/login';
-        }
-      } catch (error) {
-        alert('Logout failed. Please try again.');
-      }
-    }
-  </script>
-  <p style="color: #666; font-size: 14px; margin-top: 20px;">
-    💡 <strong>Tip:</strong> If the room doesn't exist, it will be created with your password. 
-    Others will need this password to join.
+
+  <p class="tip">
+    💡 <strong>Tip:</strong> If the room doesn't exist, it will be created with your password. Others will need this password to join.
   </p>
+
+  <script>
+    // Interactive submit feedback
+    const form = document.getElementById('joinForm');
+    const btn = form.querySelector('button');
+
+    form.addEventListener('submit', e => {
+      btn.disabled = true;
+      btn.textContent = "Joining...";
+      btn.style.opacity = 0.8;
+    });
+  </script>
 </body>
 </html>

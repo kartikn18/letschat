@@ -6,9 +6,8 @@ import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
-// ============================================================================
+
 // Password Hashing
-// ============================================================================
 
 export async function hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10);
@@ -18,9 +17,8 @@ export async function comparePassword(password: string, hash: string): Promise<b
     return await bcrypt.compare(password, hash);
 }
 
-// ============================================================================
+
 // User Management
-// ============================================================================
 
 export async function checkUserExists(email: string) {
     const existingUser = await db
@@ -31,10 +29,7 @@ export async function checkUserExists(email: string) {
     return existingUser;
 }
 
-/**
- * Creates a new user and returns a JWT token
- * @throws Error if user already exists or database operation fails
- */
+
 export async function CreateUser(email: string, password: string): Promise<string> {
     // Validate inputs
     if (!email || !password) {
@@ -71,10 +66,7 @@ export async function CreateUser(email: string, password: string): Promise<strin
     return generateJWT({ id: newUser.id, email: newUser.email });
 }
 
-/**
- * Authenticates user and returns JWT token
- * @throws Error if credentials are invalid
- */
+
 export async function LoginUser(email: string, password: string): Promise<string> {
     // Validate inputs
     if (!email || !password) {
@@ -97,21 +89,12 @@ export async function LoginUser(email: string, password: string): Promise<string
     return generateJWT({ id: user.id, email: user.email });
 }
 
-// ============================================================================
-// OTP System
-// ============================================================================
 
-/**
- * Generates a 6-digit OTP
- */
 const otpGenerate = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-/**
- * Generates OTP and saves it to database
- * @returns The generated OTP string
- */
+
 export async function generateandSaveOTP(email: string): Promise<string> {
     if (!email) {
         throw new Error('Email is required');
@@ -140,11 +123,7 @@ export async function generateandSaveOTP(email: string): Promise<string> {
     return otp;
 }
 
-/**
- * Verifies OTP and deletes it after successful verification
- * @returns true if OTP is valid
- * @throws Error if OTP is invalid or expired
- */
+
 export async function verifyOTP(email: string, otp: string): Promise<boolean> {
     if (!email || !otp) {
         throw new Error('Email and OTP are required');
@@ -182,27 +161,15 @@ export async function verifyOTP(email: string, otp: string): Promise<boolean> {
     return true;
 }
 
-// ============================================================================
-// Email Service
-// ============================================================================
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
-/**
- * Sends OTP email using Resend
- * @throws Error if email sending fails
- */
-// Update sendOTPEmail in auth.utils.ts
+
 export async function sendOTPEmail(email: string, otp: string): Promise<void> {
     if (!email || !otp) {
         throw new Error('Email and OTP are required');
     }
     
-    console.log('=== EMAIL SENDING DEBUG ===');
-    console.log('Attempting to send to:', email);
-    console.log('OTP:', otp);
-    console.log('API Key exists:', !!process.env.RESEND_API_KEY);
-    console.log('Email from:', process.env.EMAIL_FROM);
     
     if (!process.env.RESEND_API_KEY) {
         throw new Error('RESEND_API_KEY is not configured');
@@ -229,33 +196,25 @@ export async function sendOTPEmail(email: string, otp: string): Promise<void> {
         });
         
         if (error) {
-            console.error('Resend API error:', error);
+            
             throw new Error(`Failed to send OTP email: ${error.message}`);
         }
         
-        console.log('OTP email sent successfully!');
-        console.log('Email ID:', data?.id);
-        console.log('========================');
+        
     } catch (error) {
-        console.error('Error in sendOTPEmail:', error);
+        
         throw error;
     }
 }
 
-// ============================================================================
-// JWT Management
-// ============================================================================
+
 
 export interface JWTPayload {
     id: number;
     email: string;
 }
 
-/**
- * Generates a JWT token
- * @param payload User data to encode in token
- * @returns JWT token string
- */
+
 export function generateJWT(payload: JWTPayload): string {
     if (!process.env.JWT_SECRET) {
         throw new Error('JWT_SECRET is not defined in environment variables');
@@ -268,12 +227,7 @@ export function generateJWT(payload: JWTPayload): string {
     });
 }
 
-/**
- * Verifies and decodes a JWT token
- * @param token JWT token string
- * @returns Decoded payload
- * @throws Error if token is invalid or expired
- */
+
 export function verifyJWT(token: string): JWTPayload {
     if (!process.env.JWT_SECRET) {
         throw new Error('JWT_SECRET is not defined in environment variables');
@@ -296,11 +250,7 @@ export function verifyJWT(token: string): JWTPayload {
     }
 }
 
-/**
- * Refreshes a JWT token
- * @param oldToken Current JWT token
- * @returns New JWT token
- */
+
 export function refreshJWT(oldToken: string): string {
     const decoded = verifyJWT(oldToken);
     return generateJWT({ id: decoded.id, email: decoded.email });

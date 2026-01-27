@@ -13,6 +13,7 @@ import {
   getActiveUsersInRoom
 } from "./service/room.service.js"
 
+
 export async function initSocket(server: http.Server) {
   const io = new IOServer(server, {
     cors: { origin: '*' },
@@ -84,7 +85,7 @@ export async function initSocket(server: http.Server) {
       room_id: number,
       user_id: number,
       content: string,
-      message_type?: string
+      message_type?: string,
     }) => {
       console.log('✓ Message received:', payload);
 
@@ -95,7 +96,8 @@ export async function initSocket(server: http.Server) {
           payload.room_id,
           payload.user_id,
           payload.content,
-          messageType
+          messageType,
+          new Date()
         );
 
         const roomKey = String(payload.room_id);

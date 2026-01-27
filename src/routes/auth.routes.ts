@@ -111,15 +111,12 @@ router.post('/forgetPassword',otpRequestLimit, async (req: any, res: any) => {
         }
         
         // Generate and save OTP
-        console.log('Generating OTP...');
+        
         const otp = await generateandSaveOTP(email);
-        console.log('OTP generated and saved');
         
         // Send OTP via email
-        console.log('Sending email...');
         await sendOTPEmail(email, otp);
-        console.log('Email sent successfully!');
-        console.log('==============================');
+        
         
         return res.status(200).json({ 
             message: 'OTP sent to email',

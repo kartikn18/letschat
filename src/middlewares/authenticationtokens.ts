@@ -4,7 +4,7 @@ import type { NextFunction } from 'express';
 import  {verifyJWT}  from '../utils/auth.utils.js';
 import type{ JWTPayload } from '../utils/auth.utils.js';
 
-// Extend Express Request type to include user
+
 declare global {
     namespace Express {
         interface Request {
@@ -13,9 +13,9 @@ declare global {
     }
 }
 
-/**
- * Middleware to authenticate JWT tokens from cookies or headers
- */
+
+ //Middleware to authenticate JWT tokens from cookies or headers
+ 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
     try {
         // Get token from cookie or Authorization header

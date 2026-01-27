@@ -2,7 +2,6 @@ import {db} from "../config/db.js";
 
  
 export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
-  console.log('📝 Adding/updating room member:', { user_id, room_id });
   
   // Check if already a member
   const existing = await db
@@ -21,7 +20,7 @@ export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
       .where('room_id', '=', room_id)
       .execute();
     
-    console.log('✅ Updated existing member');
+    
     return existing;
   } else {
     // Add as new member
@@ -36,7 +35,7 @@ export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
       .returningAll()
       .executeTakeFirstOrThrow();
     
-    console.log('✅ Added new member');
+    
     return newMember;
   }
 }
@@ -60,12 +59,20 @@ export async function getTotalMemberCount(room_id: number): Promise<number> {
  * Create a new active session when user joins
  */
 export async function createRoomSession(
-  user_id: number, 
-  room_id: number, 
+  user_id: number,
+  room_id: number,
   socket_id: string
 ) {
-  console.log('🔌 Creating room session:', { user_id, room_id, socket_id });
-  
+  // 1. Kill any old session for same user in same room
+  await db
+    .updateTable('room_sessions')
+    .set({ is_active: false })
+    .where('user_id', '=', user_id)
+    .where('room_id', '=', room_id)
+    .where('is_active', '=', true)
+    .execute();
+
+  // 2. Insert new session
   const session = await db
     .insertInto('room_sessions')
     .values({
@@ -77,16 +84,16 @@ export async function createRoomSession(
     } as any)
     .returningAll()
     .executeTakeFirstOrThrow();
-  
-  console.log('✅ Session created:', session.id);
+
   return session;
 }
+
 
 /**
  * Mark session as inactive when user disconnects
  */
 export async function deactivateRoomSession(socket_id: string) {
-  console.log('🔌 Deactivating session for socket:', socket_id);
+  
   
   const session = await db
     .updateTable('room_sessions')
@@ -97,7 +104,7 @@ export async function deactivateRoomSession(socket_id: string) {
     .executeTakeFirst();
   
   if (session) {
-    console.log('✅ Session deactivated for room:', session.room_id);
+    
   }
   
   return session;

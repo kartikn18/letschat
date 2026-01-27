@@ -7,7 +7,6 @@ const router = express.Router();
 router.post("/upload",upload.single('file'), async(req,res)=>{
     try {
         if(req.file) {
-    console.log('fileinfo',req.file);
     const {room_id,user_id} = req.body;
     // file url 
     const fileurl = req.file.path;
