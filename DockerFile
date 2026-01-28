@@ -1,0 +1,22 @@
+#--build stage--
+    FROM node:20-alpine AS build
+
+    WORKDIR /app
+
+    COPY package*.json ./
+    RUN npm install 
+    COPY . .
+    RUN npm run build
+
+    #--FINAL STAGE--
+
+        FROM node:20-alpine
+        WORKDIR /app
+        COPY package*.json ./
+        RUN npm install --production
+        COPY --from=build /app/dist ./dist
+        COPY --from=build /app/.env ./env
+        COPY --from=build /app/migrations ./migrations
+        EXPOSE 4000
+
+        CMD ["node","dist/app.js"]

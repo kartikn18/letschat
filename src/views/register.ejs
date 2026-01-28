@@ -22,7 +22,6 @@ body {
 .container {
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.8);
     width: 100%;
@@ -31,26 +30,46 @@ body {
     border: 1px solid rgba(255,255,255,0.15);
 }
 
-.logo h1 {
+/* Logo + spacing */
+.logo { text-align: center; margin-bottom: 12px; }
+.logo h1 { color: #b69cff; font-size: 28px; }
+
+.form-title { text-align: center; font-size: 24px; margin-bottom: 6px; }
+.form-subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 8px; }
+
+/* Tagline */
+.tagline-bar {
+    width: 100%;
     text-align: center;
-    color: #b69cff;
-    font-size: 28px;
-    margin-bottom: 20px;
+    padding: 10px 15px;
+    margin-bottom: 22px;
+    background: linear-gradient(
+        135deg,
+        rgba(182,156,255,0.18),
+        rgba(138,108,255,0.05)
+    );
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 25px rgba(182,156,255,0.25);
 }
 
-.form-title {
-    text-align: center;
-    color: #fff;
-    font-size: 24px;
-    margin-bottom: 8px;
+.tagline-text {
+    color: #e0d7ff;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 10px rgba(182,156,255,0.5);
+    animation: glowPulse 3s ease-in-out infinite;
 }
 
-.form-subtitle {
-    text-align: center;
-    color: #aaa;
-    font-size: 14px;
-    margin-bottom: 25px;
+@keyframes glowPulse {
+    0%   { text-shadow: 0 0 6px rgba(182,156,255,0.4); }
+    50%  { text-shadow: 0 0 14px rgba(182,156,255,0.9); }
+    100% { text-shadow: 0 0 6px rgba(182,156,255,0.4); }
 }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
 
 .form-group label {
     color: #ddd;
@@ -69,9 +88,7 @@ body {
     font-size: 14px;
 }
 
-.form-group input::placeholder {
-    color: #aaa;
-}
+.form-group input::placeholder { color: #aaa; }
 
 .form-group input:focus {
     outline: none;
@@ -99,23 +116,27 @@ body {
 }
 
 .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
 .link-group {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 22px;
 }
 
 .link-group a {
     color: #b69cff;
     text-decoration: none;
 }
+.link-group a:hover { text-decoration: underline; }
 
-.link-group a:hover {
-    text-decoration: underline;
+.alert {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-align: center;
 }
 
 .alert-success {
@@ -129,112 +150,125 @@ body {
     color: #ff7b7b;
     border: 1px solid rgba(255,60,60,0.3);
 }
-
-.loading {
-    display: none;
-    text-align: center;
-    margin-top: 10px;
-    color: #b69cff;
-}
-.loading.show { display: block; }
 </style>
-
 </head>
 
 <body>
 <div class="container">
+
     <div class="logo">
-        <h1>💬 SecureChat</h1>
+        <h1>💬 LetsChat</h1>
     </div>
 
     <h2 class="form-title">Create Account</h2>
-    <p class="form-subtitle">Sign up to start chatting</p>
+    <p class="form-subtitle">Start chatting with friends</p>
+
+    <!-- TAGLINE -->
+    <div class="tagline-bar">
+        <span class="tagline-text">
+            ✨ Join rooms, create your own, and chat instantly
+        </span>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
 
     <form id="registerForm">
-
         <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com">
+            <label>Email Address</label>
+            <input type="email" name="email" required placeholder="you@example.com">
         </div>
 
         <div class="form-group">
-            <label for="password">Password</label>
+            <label>Password</label>
             <input type="password" id="password" name="password" required placeholder="••••••••" minlength="6">
         </div>
 
         <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••" minlength="6">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••">
         </div>
 
-        <button type="submit" class="btn">Create Account</button>
-        <div class="loading">Creating account...</div>
+        <button class="btn" type="submit">Create Account</button>
     </form>
 
     <div class="link-group">
         <p>Already have an account? <a href="/login">Sign In</a></p>
     </div>
+
 </div>
 
 <script>
 const form = document.getElementById('registerForm');
 const password = document.getElementById('password');
 const confirmPassword = document.getElementById('confirmPassword');
+const submitBtn = form.querySelector('.btn');
 
+// Password match validation
 confirmPassword.addEventListener('input', () => {
     confirmPassword.setCustomValidity(
         password.value !== confirmPassword.value ? 'Passwords do not match' : ''
     );
 });
 
+// Show alert function
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    const container = document.getElementById('alertContainer');
+    container.innerHTML = '';
+    container.appendChild(alertDiv);
+    
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+
+// Form submission
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const submitBtn = form.querySelector('button');
-    const loading = form.querySelector('.loading');
-
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
+    
+    // Check password match one more time
+    if (password.value !== confirmPassword.value) {
+        showAlert('Passwords do not match', 'error');
+        return;
+    }
+    
     submitBtn.disabled = true;
-    loading.classList.add('show');
-
-    const oldAlert = form.querySelector('.alert');
-    if (oldAlert) oldAlert.remove();
-
+    submitBtn.textContent = 'Creating Account...';
+    
+    const formData = new FormData(form);
+    const data = {
+        email: formData.get('email'),
+        password: formData.get('password')
+    };
+    
     try {
+        // ✅ FIXED: Use /api/auth/register instead of /register
         const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         });
-
+        
         const result = await response.json();
-
+        
         if (response.ok) {
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success';
-            alert.textContent = result.message || 'Success!';
-            form.insertBefore(alert, form.firstChild);
-
+            showAlert('Account created successfully! Redirecting...', 'success');
             setTimeout(() => {
-                window.location.href = result.redirectTo || '/join';
-            }, 500);
+                // Use the redirect path from backend or default to /join
+                window.location.href = result.redirect || '/join';
+            }, 1500);
         } else {
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-error';
-            alert.textContent = result.message || 'An error occurred';
-            form.insertBefore(alert, form.firstChild);
+            showAlert(result.message || 'Registration failed', 'error');
             submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
         }
-    } catch {
-        const alert = document.createElement('div');
-        alert.className = 'alert alert-error';
-        alert.textContent = 'Network error. Please try again.';
-        form.insertBefore(alert, form.firstChild);
+    } catch (error) {
+        console.error('Registration error:', error);
+        showAlert('An error occurred. Please try again.', 'error');
         submitBtn.disabled = false;
-    } finally {
-        loading.classList.remove('show');
+        submitBtn.textContent = 'Create Account';
     }
 });
 </script>

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat: <%= room.room_name %></title>
-  <style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chat: <%= room.room_name %></title>
+
+<style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -38,6 +39,7 @@ h1 {
 .stats {
   display: flex;
   gap: 15px;
+  align-items: center;
 }
 
 .stat-item {
@@ -50,6 +52,52 @@ h1 {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+/* Logout button */
+.logout-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,60,60,0.15);
+  color: #ff7b7b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255,60,60,0.35);
+  box-shadow: 0 0 12px rgba(255,60,60,0.6);
+  transform: translateY(-1px);
+}
+
+/* Tagline bar */
+.tagline-bar {
+  text-align: center;
+  padding: 10px 15px;
+  background: linear-gradient(
+    135deg,
+    rgba(182,156,255,0.15),
+    rgba(138,108,255,0.05)
+  );
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+.tagline-text {
+  color: #d6c9ff;
+  text-shadow: 0 0 10px rgba(182,156,255,0.4);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 6px rgba(182,156,255,0.4); }
+  50% { text-shadow: 0 0 14px rgba(182,156,255,0.8); }
+  100% { text-shadow: 0 0 6px rgba(182,156,255,0.4); }
 }
 
 /* Status bar */
@@ -190,18 +238,12 @@ button[type="submit"]:hover {
   flex-shrink: 0;
 }
 
-#userList {
-  font-size: 13px;
-  color: #ddd;
-}
-
 #userList strong {
   display: block;
   margin-bottom: 10px;
   color: #b69cff;
 }
 
-/* User items */
 .user-item {
   display: flex;
   align-items: center;
@@ -210,89 +252,90 @@ button[type="submit"]:hover {
   border-radius: 8px;
   margin-bottom: 6px;
   background: rgba(255,255,255,0.05);
-  transition: background 0.2s;
 }
 
-.user-item:hover {
-  background: rgba(138,108,255,0.2);
-}
-
-/* Scrollbar */
-#messages::-webkit-scrollbar {
-  width: 6px;
-}
-#messages::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
-}
-#messages::-webkit-scrollbar-thumb {
-  background: #8a6cff;
-  border-radius: 3px;
-}
 </style>
-
-
 </head>
+
 <body>
-  <!-- Header with Stats -->
-  <div class="header">
-    <h1>💬 <%= room.room_name %></h1>
-    <div class="stats">
-      <div class="stat-item" id="onlineCount">🟢 0 online</div>
-      <div class="stat-item" id="totalMembers">👥 0 total members</div>
+
+<div class="header">
+  <h1>💬 <%= room.room_name %></h1>
+  <div class="stats">
+    <div class="stat-item" id="onlineCount">🟢 0 online</div>
+    <div class="stat-item" id="totalMembers">👥 0 total members</div>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </div>
+</div>
+
+<div class="tagline-bar">
+  <span class="tagline-text">
+    ✨ Join rooms, create your own, and chat instantly
+  </span>
+</div>
+
+<div id="status">🔄 Connecting...</div>
+
+<div class="container">
+  <div class="main-chat">
+    <div id="messages"></div>
+    <div id="typingIndicator"></div>
+
+    <form id="sendForm">
+      <input id="msg" autocomplete="off" placeholder="Type a message..." maxlength="2000" />
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+      <button type="button" id="uploadBtn">📎</button>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <div class="sidebar">
+    <div id="userList">
+      <strong>Online Users</strong>
+      <div style="color:#999;">Loading...</div>
     </div>
   </div>
-  <!-- Connection Status -->
-  <div id="status" style="background: yellow; color: black;">
-    🔄 Connecting...
-  </div>
-  <!-- Main Container -->
-  <div class="container">
-    <!-- Main Chat Area -->
-    <div class="main-chat">
-      <div id="messages"></div>
-      <div id="typingIndicator"></div>
-  <form id="sendForm">
-    <input 
-      id="msg" 
-      autocomplete="off" 
-      placeholder="Type a message..." 
-      maxlength="2000"
-    />
-    <input 
-      type="file" 
-      id="fileInput" 
-      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
-      style="display:none;" 
-    />
-    <button type="button" id="uploadBtn" title="Upload Image">📎</button>
-    <button type="submit">Send</button>
-  </form>
 </div>
 
-<!-- Sidebar with User List -->
-<div class="sidebar">
-  <div id="userList">
-    <strong>Online Users:</strong>
-    <div style="color: #999; font-style: italic;">Loading...</div>
-  </div>
-</div>
-  </div>
-  <!-- Pass data to JavaScript -->
-  <script id="app-data" type="application/json">
-    <%- JSON.stringify({
-      user: {
-        id: user?.id || null,
-        username: user?.username || 'Unknown'
-      },
-      room: {
-        id: room?.id || null,
-        name: room?.room_name || 'Unknown'
-      },
-      socketUrl: socketUrl
-    }) %>
-  </script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/client.js"></script>
+<script id="app-data" type="application/json">
+<%- JSON.stringify({
+  user: { id: user?.id || null, username: user?.username || 'Unknown' },
+  room: { id: room?.id || null, name: room?.room_name || 'Unknown' },
+  socketUrl: socketUrl
+}) %>
+</script>
+
+<script>
+// Logout functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    logoutBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to logout?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Logout failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('Logout failed. Please try again.');
+        }
+    });
+});
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/client.js"></script>
+
 </body>
 </html>
-````

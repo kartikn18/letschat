@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title || 'Login' %></title>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title || 'Login' %></title>
+
+<style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -21,7 +22,6 @@ body {
 .container {
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.8);
     width: 100%;
@@ -30,34 +30,30 @@ body {
     border: 1px solid rgba(255,255,255,0.15);
 }
 
-.logo h1 {
+/* ---- Spacing ---- */
+.logo { margin-bottom: 20px; }
+.logo h1 { margin-bottom: 0; }
+
+.form-title { text-align: center; font-size: 24px; margin-bottom: 6px; }
+.form-subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 28px; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label { margin-bottom: 6px; display: block; }
+
+button.btn { margin-top: 10px; }
+
+.loading { margin-top: 12px; }
+
+.link-group { margin-top: 28px; }
+
+.alert {
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
     text-align: center;
-    color: #b69cff;
-    font-size: 28px;
-    margin-bottom: 30px;
 }
 
-.form-title {
-    text-align: center;
-    color: #fff;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.form-subtitle {
-    text-align: center;
-    color: #aaa;
-    font-size: 14px;
-    margin-bottom: 30px;
-}
-
-.form-group label {
-    color: #ddd;
-    font-weight: 500;
-    margin-bottom: 8px;
-    display: block;
-}
-
+/* ---- Inputs ---- */
 .form-group input {
     width: 100%;
     padding: 12px 16px;
@@ -68,9 +64,7 @@ body {
     font-size: 14px;
 }
 
-.form-group input::placeholder {
-    color: #aaa;
-}
+.form-group input::placeholder { color: #aaa; }
 
 .form-group input:focus {
     outline: none;
@@ -78,6 +72,7 @@ body {
     box-shadow: 0 0 0 3px rgba(138,108,255,0.3);
 }
 
+/* ---- Button ---- */
 .btn {
     width: 100%;
     padding: 14px;
@@ -100,29 +95,24 @@ body {
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
 }
 
-.link-group {
-    text-align: center;
-    margin-top: 20px;
-}
+/* ---- Links ---- */
+.link-group { text-align: center; }
 
 .link-group a {
     color: #b69cff;
     text-decoration: none;
 }
 
-.link-group a:hover {
-    text-decoration: underline;
-}
+.link-group a:hover { text-decoration: underline; }
 
 .divider {
     margin: 20px 0;
-    text-align: center;
     color: #777;
 }
 
+/* ---- Alerts ---- */
 .alert-success {
     background: rgba(0,255,120,0.15);
     color: #6affb0;
@@ -135,99 +125,95 @@ body {
     border: 1px solid rgba(255,60,60,0.3);
 }
 
-.loading {
-    display: none;
-    text-align: center;
-    margin-top: 10px;
-    color: #b69cff;
-}
+/* ---- Loading ---- */
+.loading { display: none; text-align: center; color: #b69cff; }
 .loading.show { display: block; }
 </style>
-
 </head>
+
 <body>
-    <div class="container">
-        <div class="logo">
-            <h1>💬 SecureChat</h1>
-        </div>
-        
-        <h2 class="form-title">Welcome Back</h2>
-        <p class="form-subtitle">Sign in to start chatting</p>
+<div class="container">
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com">
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
-            </div>
-            
-            <button type="submit" class="btn">Sign In</button>
-            <div class="loading">Signing in...</div>
-        </form>
-
-        <div class="link-group">
-            <a href="/forgot-password">Forgot Password?</a>
-            <div class="divider">or</div>
-            <p>Don't have an account? <a href="/register">Sign Up</a></p>
-        </div>
+    <div class="logo">
+        <h1>💬 letsChat</h1>
     </div>
-    
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const form = e.target;
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const loading = form.querySelector('.loading');
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            submitBtn.disabled = true;
-            loading.classList.add('show');
-            
-            const oldAlert = form.querySelector('.alert');
-            if (oldAlert) oldAlert.remove();
-            
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    const alert = document.createElement('div');
-                    alert.className = 'alert alert-success';
-                    alert.textContent = result.message || 'Success!';
-                    form.insertBefore(alert, form.firstChild);
-                    
-                    setTimeout(() => {
-                        window.location.href = result.redirectTo || '/join';
-                    }, 500);
-                } else {
-                    const alert = document.createElement('div');
-                    alert.className = 'alert alert-error';
-                    alert.textContent = result.message || 'An error occurred';
-                    form.insertBefore(alert, form.firstChild);
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-error';
-                alert.textContent = 'Network error. Please try again.';
-                form.insertBefore(alert, form.firstChild);
-                submitBtn.disabled = false;
-            } finally {
-                loading.classList.remove('show');
-            }
+
+    <h2 class="form-title">Welcome Back</h2>
+    <p class="form-subtitle">Sign in to create rooms</p>
+
+    <form id="loginForm">
+
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" required placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn">Sign In</button>
+        <div class="loading">Signing in...</div>
+    </form>
+
+    <div class="link-group">
+        <a href="/forgot-password">Forgot Password?</a>
+        <div class="divider">or</div>
+        <p>Don't have an account? <a href="/register">Sign Up</a></p>
+    </div>
+
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = form.querySelector('.btn');
+    const loading = form.querySelector('.loading');
+
+    const data = Object.fromEntries(new FormData(form));
+
+    submitBtn.disabled = true;
+    loading.classList.add('show');
+
+    const oldAlert = form.querySelector('.alert');
+    if (oldAlert) oldAlert.remove();
+
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
         });
-    </script>
+
+        const result = await response.json();
+
+        const alert = document.createElement('div');
+        alert.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-error');
+        alert.textContent = result.message || (response.ok ? 'Success!' : 'Login failed');
+        form.insertBefore(alert, form.firstChild);
+
+        if (response.ok) {
+            setTimeout(() => {
+                window.location.href = result.redirectTo || '/join';
+            }, 600);
+        } else {
+            submitBtn.disabled = false;
+        }
+
+    } catch {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.textContent = 'Network error. Please try again.';
+        form.insertBefore(alert, form.firstChild);
+        submitBtn.disabled = false;
+    } finally {
+        loading.classList.remove('show');
+    }
+});
+</script>
+
 </body>
 </html>

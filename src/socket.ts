@@ -31,13 +31,13 @@ export async function initSocket(server: http.Server) {
   io.adapter(createAdapter(pubClient, subClient));
 
   io.on("connection", (socket: IOSocket) => {
-    console.log('✓ Client connected:', socket.id);
+    
 
     // ================= JOIN ROOM =================
     socket.on("joinRoom", async (payload: { room_id: number, user_id: number }) => {
       const { room_id, user_id } = payload;
       
-      console.log('✓ joinRoom event:', { room_id, user_id, socket_id: socket.id });
+      
       
       const roomKey = String(room_id);
       socket.join(roomKey);
@@ -54,7 +54,7 @@ export async function initSocket(server: http.Server) {
         const totalCount = await getTotalMemberCount(room_id);
         const activeUsers = await getActiveUsersInRoom(room_id);
         
-        console.log('📊 Room stats:', { activeCount, totalCount });
+        
         
         // 4. Broadcast updated counts to everyone in room
         io.to(roomKey).emit("roomStatsUpdate", {
@@ -87,7 +87,7 @@ export async function initSocket(server: http.Server) {
       content: string,
       message_type?: string,
     }) => {
-      console.log('✓ Message received:', payload);
+      
 
       try {
         const messageType = payload.message_type || 'text';
@@ -133,7 +133,7 @@ export async function initSocket(server: http.Server) {
 
     // ================= DISCONNECT =================
     socket.on("disconnect", async () => {
-      console.log('❌ Client disconnecting:', socket.id);
+      
       
       try {
         // Deactivate session and get room info
@@ -147,7 +147,7 @@ export async function initSocket(server: http.Server) {
           const totalCount = await getTotalMemberCount(session.room_id);
           const activeUsers = await getActiveUsersInRoom(session.room_id);
           
-          console.log('📊 Updated room stats after disconnect:', { activeCount, totalCount });
+          
           
           // Broadcast updated counts
           io.to(roomKey).emit("roomStatsUpdate", {

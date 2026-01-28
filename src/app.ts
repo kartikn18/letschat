@@ -55,7 +55,7 @@ app.get('/verify-otp',redirectIfAuthenticated ,(req,res)=>{
 });
 app.get('/dashboard', authenticate, (req:any, res:any) => {
     res.render('dashboard', { 
-        title: 'Dashboard - SecureChat',
+        title: 'Dashboard - letsChat',
         email: req.user.email
     });
 });

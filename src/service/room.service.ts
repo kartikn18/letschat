@@ -53,11 +53,8 @@ export async function getTotalMemberCount(room_id: number): Promise<number> {
   return Number(result?.count || 0);
 }
 
-// ============= SESSION TRACKING (Currently Online) =============
+// ============= SESSION TRACKING (Currently Online) ============
 
-/**
- * Create a new active session when user joins
- */
 export async function createRoomSession(
   user_id: number,
   room_id: number,
