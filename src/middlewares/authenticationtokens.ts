@@ -29,9 +29,11 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
         }
         
         if (!token) {
-            return res.status(401).json({ message: 'Authentication required' });
+            return res.status(401).json({
+                message: 'Authentication token is missing',
+                redirect: '/register'
+            });
         }
-        
         // Verify token
         const decoded = verifyJWT(token);
         
@@ -42,7 +44,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     } catch (error) {
         console.error('Authentication error:', error);
         return res.status(401).json({ 
-            message: error instanceof Error ? error.message : 'Invalid or expired token'
+            message: error instanceof Error ? error.message : 'Invalid or expired token',
+            redirect: '/register'
         });
     }
 }

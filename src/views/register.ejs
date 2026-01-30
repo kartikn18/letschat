@@ -150,6 +150,32 @@ body {
     color: #ff7b7b;
     border: 1px solid rgba(255,60,60,0.3);
 }
+/* Add this to your existing styles */
+
+@media (max-width: 480px) {
+    .container {
+        padding: 24px 20px; /* Reduce padding on mobile */
+    }
+    
+    .logo h1 {
+        font-size: 24px; /* Slightly smaller logo */
+    }
+    
+    .form-title {
+        font-size: 20px;
+    }
+    
+    .tagline-text {
+        font-size: 12px;
+    }
+}
+
+/* For very small screens */
+@media (max-width: 360px) {
+    .container {
+        padding: 20px 16px;
+    }
+}
 </style>
 </head>
 
