@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS room_sessions (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_room_members_room ON room_members(room_id);
-CREATE INDEX idx_room_sessions_room_active ON room_sessions(room_id, is_active);
-CREATE INDEX idx_room_sessions_socket ON room_sessions(socket_id);
+CREATE INDEX idx_room_members_room ON room_members(room_id); --db optimization
+CREATE INDEX idx_room_sessions_room_active ON room_sessions(room_id, is_active); --db optimization
+CREATE INDEX idx_room_sessions_socket ON room_sessions(socket_id); --db optimization
 
 -- Create profile_avatars table
 CREATE TABLE IF NOT EXISTS profile_avatars (
