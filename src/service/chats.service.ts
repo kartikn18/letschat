@@ -85,35 +85,34 @@ export async function findOrCreateRoom(name: string) {
 export async function savedMessage(room_id: number, user_id: number, content: string,message_type:string='text',created_at:Date=new Date()) {
   
   try {
-    const msg = await db
-      .insertInto("messages")
-      .values({
-        room_id,
-        user_id,
+    const result = await db.transaction().execute(async(trx) => {
+      const msg = await trx
+        .insertInto("messages")
+        .values({
+          room_id,
+          user_id,
         content,
         message_type,
         created_at
       } as any)
       .returningAll()
-      .executeTakeFirstOrThrow();
-    
-    
+      .executeTakeFirstOrThrow();;
     // Fetch username
     const user = await db
       .selectFrom("users")
       .select("username")
       .where("id", "=", user_id)
       .executeTakeFirst();
-    
+
    
-    
     return {
       ...msg,
       username: user?.username || 'Unknown'
     };
-    
-  } catch (error) {
-    console.error('❌ Error in savedMessage:', error);
+    });
+  } 
+  catch (error) {
+    console.error(' Error in savedMessage:', error);
     throw error;
   }
 }

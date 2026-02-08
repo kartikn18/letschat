@@ -31,39 +31,35 @@ export async function checkUserExists(email: string) {
 
 
 export async function CreateUser(email: string, password: string): Promise<string> {
-    // Validate inputs
-    if (!email || !password) {
-        throw new Error('Email and password are required');
-    }
-    
-    if (password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
-    }
-    
-    // Check if user exists
-    const existingUser = await checkUserExists(email);
-    if (existingUser) {
-        throw new Error('User already exists');
-    }
-    
-    // Create new user
-    const hashedPassword = await hashPassword(password);
-    const newUser = await db
-        .insertInto('auth_credentials')
-        .values({
-            email: email,
-            password: hashedPassword,
-            created_at: new Date()
-        } as any)
-        .returning(['id', 'email'])
-        .executeTakeFirst();
-    
-    if (!newUser) {
-        throw new Error('Failed to create user');
-    }
-    
-    // Generate and return JWT token
-    return generateJWT({ id: newUser.id, email: newUser.email });
+  if (!email || !password) throw new Error("Email and password required");
+  if (password.length < 6) throw new Error("Password too short");
+
+  const hashedPassword = await hashPassword(password);
+
+  const result = await db.transaction().execute(async (trx) => {
+    // double protection against race condition
+    const exists = await trx
+      .selectFrom("auth_credentials")
+      .select("id")
+      .where("email", "=", email)
+      .executeTakeFirst();
+
+    if (exists) throw new Error("User already exists");
+
+    const newUser = await trx
+      .insertInto("auth_credentials")
+      .values({
+        email,
+        password:hashedPassword,
+        created_at: new Date(),
+      }as any)
+      .returning(["id", "email"])
+      .executeTakeFirstOrThrow()
+
+    return newUser;
+  });
+
+  return generateJWT({ id: result.id, email: result.email });
 }
 
 

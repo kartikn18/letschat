@@ -4,7 +4,8 @@ import {db} from "../config/db.js";
 export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
   
   // Check if already a member
-  const existing = await db
+  const result = await db.transaction().execute(async(trx)=>{
+  const existing = await trx
     .selectFrom('room_members')
     .selectAll()
     .where('user_id', '=', user_id)
@@ -13,7 +14,7 @@ export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
   
   if (existing) {
     // Update last seen
-    await db
+    await trx
       .updateTable('room_members')
       .set({ last_seen_at: new Date() })
       .where('user_id', '=', user_id)
@@ -24,7 +25,7 @@ export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
     return existing;
   } else {
     // Add as new member
-    const newMember = await db
+    const newMember = await trx
       .insertInto('room_members')
       .values({
         user_id,
@@ -37,21 +38,23 @@ export async function addOrUpdateRoomMember(user_id: number, room_id: number) {
     
     
     return newMember;
-  }
-}
+  }});
+  };
+
 
 /**
  * Get total member count for a room (all time)
  */
 export async function getTotalMemberCount(room_id: number): Promise<number> {
+
   const result = await db
     .selectFrom('room_members')
     .select(db.fn.count('id').as('count'))
     .where('room_id', '=', room_id)
     .executeTakeFirst();
   
-  return Number(result?.count || 0);
-}
+  return Number(result?.count || 0);};
+
 
 // ============= SESSION TRACKING (Currently Online) ============
 
@@ -60,8 +63,9 @@ export async function createRoomSession(
   room_id: number,
   socket_id: string
 ) {
+  const result = await db.transaction().execute(async(trx)=>{
   // 1. Kill any old session for same user in same room
-  await db
+  await trx
     .updateTable('room_sessions')
     .set({ is_active: false })
     .where('user_id', '=', user_id)
@@ -70,7 +74,7 @@ export async function createRoomSession(
     .execute();
 
   // 2. Insert new session
-  const session = await db
+  const session = await trx
     .insertInto('room_sessions')
     .values({
       user_id,
@@ -83,7 +87,7 @@ export async function createRoomSession(
     .executeTakeFirstOrThrow();
 
   return session;
-}
+})};
 
 
 /**
