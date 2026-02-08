@@ -76,7 +76,7 @@ export async function initSocket(server: http.Server) {
         });
         
       } catch (error) {
-        console.error('❌ Error in joinRoom:', error);
+        console.error(' Error in joinRoom:', error);
       }
     });
 
