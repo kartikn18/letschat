@@ -3,14 +3,19 @@ import type { Socket as IOSocket } from "socket.io";
 import http from "http";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { redis } from "./config/redis.js";
-import { savedMessage, getRecentMessages } from "./service/chats.service.js";
+import { 
+  savedMessage, 
+  getRecentMessages,
+  addOnlineUser,
+  getOnlineUsers,
+  removeOnlineUser,
+  countOnlineUsers 
+} from "./service/chats.service.js";
 import {
   addOrUpdateRoomMember,
   createRoomSession,
   deactivateRoomSession,
-  getActiveUserCount,
   getTotalMemberCount,
-  getActiveUsersInRoom
 } from "./service/room.service.js"
 
 
@@ -48,11 +53,12 @@ export async function initSocket(server: http.Server) {
         
         // 2. Create active session (temporary record)
         await createRoomSession(user_id, room_id, socket.id);
-        
+        //temp store in redis while adding user 
+        await addOnlineUser(user_id, room_id);
         // 3. Get counts
-        const activeCount = await getActiveUserCount(room_id);
+        const activeCount = await countOnlineUsers(room_id);
         const totalCount = await getTotalMemberCount(room_id);
-        const activeUsers = await getActiveUsersInRoom(room_id);
+        const activeUsers = await getOnlineUsers(room_id);
         
         
         
@@ -60,10 +66,7 @@ export async function initSocket(server: http.Server) {
         io.to(roomKey).emit("roomStatsUpdate", {
           online: activeCount,        // Currently online
           totalMembers: totalCount,   // Total members ever
-          activeUsers: activeUsers.map(u => ({
-            id: u.id,
-            username: u.username
-          }))
+          activeUsers: activeUsers
         });
         
         // 5. Load recent messages
@@ -72,7 +75,7 @@ export async function initSocket(server: http.Server) {
         
         // 6. Announce user joined
         socket.to(roomKey).emit("userJoined", {
-          username: activeUsers.find(u => u.id === user_id)?.username
+          username: activeUsers
         });
         
       } catch (error) {
@@ -141,11 +144,12 @@ export async function initSocket(server: http.Server) {
         
         if (session) {
           const roomKey = String(session.room_id);
-          
+          //redis remove user from online list
+          await removeOnlineUser(session.user_id, session.room_id);
           // Get updated counts
-          const activeCount = await getActiveUserCount(session.room_id);
+          const activeCount = await countOnlineUsers(session.room_id);
           const totalCount = await getTotalMemberCount(session.room_id);
-          const activeUsers = await getActiveUsersInRoom(session.room_id);
+          const activeUsers = await getOnlineUsers(session.room_id);
           
           
           

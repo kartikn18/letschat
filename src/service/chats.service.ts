@@ -185,3 +185,17 @@ export async function removeOnlineUser(userID:number,roomID:number){
 export async function countOnlineUsers(roomID:number):Promise<number>{
    return await redis.sCard(`online_users_room_${roomID}`);
 }
+export async function getOnlineUsers(roomID:number){
+  const userIds = await redis.sMembers(`online_users_room_${roomID}`);
+  if (userIds.length === 0) return [];
+  
+  // Fetch user details from database (
+  const users = await db
+    .selectFrom('users') 
+    .select(['id', 'username'])
+    .where('id', 'in', userIds.map(id => parseInt(id)))
+    .execute();
+  
+  return users;
+}
+
